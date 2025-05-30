@@ -23,6 +23,12 @@ contract Vault is Ownable, ERC4626, AccessControl {
     /// @dev Used in AccessControl for agent permissions
     bytes32 public constant AGENT_ROLE = keccak256("VAULT_ADMIN_ROLE");
 
+    /// @notice Strategies address
+    address[] public strategies;
+
+    /// @notice Strategies address
+    mapping(address => bool) public isStrategy;
+
     // ============ Modifiers ============
     /// @notice Restricts function access to addresses with MANAGER_ROLE
     /// @dev Reverts if caller doesn't have MANAGER_ROLE
@@ -67,53 +73,28 @@ contract Vault is Ownable, ERC4626, AccessControl {
     }
 
     // ============ External Functions ============
-    /// @notice Deposits assets into the vault and mints shares
-    /// @param assets Amount of assets to deposit
-    /// @param receiver Address to receive the shares
-    /// @return shares Amount of shares minted
-    function deposit(
-        uint256 assets,
-        address receiver
-    ) public override returns (uint256) {
-        return super.deposit(assets, receiver);
+
+    function addStrategy(address strategy) external onlyManager {
+        require(strategy != address(0), "Strategy cannot be zero address");
+        require(!isStrategy[strategy], "Strategy already exists");
+        isStrategy[strategy] = true;
+        strategies.push(strategy);
     }
 
-    /// @notice Withdraws assets from the vault and burns shares
-    /// @param assets Amount of assets to withdraw
-    /// @param receiver Address to receive the assets
-    /// @param owner Address that owns the shares
-    /// @return shares Amount of shares burned
-    function withdraw(
-        uint256 assets,
-        address receiver,
-        address owner
-    ) public override returns (uint256) {
-        return super.withdraw(assets, receiver, owner);
+    function removeStrategy(address strategy) external onlyManager {
+        require(isStrategy[strategy], "Strategy does not exist");
+        isStrategy[strategy] = false;
+        strategies.push(strategy);
+    }
+
+    function executeStrategy(
+        address strategy,
+        bytes calldata data
+    ) external onlyAgent {
+        require(isStrategy[strategy], "Strategy does not exist");
+        (bool success, ) = strategy.call(data);
+        require(success, "Strategy execution failed");
     }
 
     // ============ Internal Functions ============
-    /// @notice Internal function to handle deposits
-    /// @dev Overrides ERC4626 _deposit to add event emission
-    function _deposit(
-        address caller,
-        address receiver,
-        uint256 assets,
-        uint256 shares
-    ) internal override {
-        super._deposit(caller, receiver, assets, shares);
-        emit Deposit(caller, receiver, assets, shares);
-    }
-
-    /// @notice Internal function to handle withdrawals
-    /// @dev Overrides ERC4626 _withdraw to add event emission
-    function _withdraw(
-        address caller,
-        address receiver,
-        address owner,
-        uint256 assets,
-        uint256 shares
-    ) internal override {
-        super._withdraw(caller, receiver, owner, assets, shares);
-        emit Withdraw(caller, receiver, owner, assets, shares);
-    }
 }
