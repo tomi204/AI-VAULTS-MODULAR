@@ -1,6 +1,38 @@
 import { ethers } from "hardhat";
 
 async function main() {
+    console.log("⚠️  DEPRECATED SCRIPT ⚠️");
+    console.log("");
+    console.log("This script has been superseded by a more powerful unified deployment system.");
+    console.log("");
+    console.log("🚀 USE INSTEAD:");
+    console.log("   npx hardhat run scripts/deployTokensAndVault.ts --network <NETWORK>");
+    console.log("");
+    console.log("✅ Benefits of the new system:");
+    console.log("• Auto-deploys mock tokens when needed (Flow, testnets)");
+    console.log("• Uses existing tokens on established networks (Ethereum, Arbitrum, Base)");
+    console.log("• Unified configuration via environment variables");
+    console.log("• Automatic token configuration");
+    console.log("• Clear deployment summary with copy-paste addresses");
+    console.log("• Scalable - easy to add new blockchains");
+    console.log("");
+    console.log("📚 Documentation:");
+    console.log("   See README_DEPLOYMENT.md for complete guide");
+    console.log("");
+    console.log("🔧 Quick setup:");
+    console.log("1. Copy env.example to .env");
+    console.log("2. Set PRIV_KEY and required Pyth addresses");
+    console.log("3. Run: npx hardhat run scripts/deployTokensAndVault.ts --network <NETWORK>");
+    console.log("");
+    
+    // Give user option to continue with legacy script
+    console.log("Press Ctrl+C to cancel and use the new system (recommended)");
+    console.log("Or wait 10 seconds to continue with this legacy script...");
+    
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    
+    console.log("\n⚠️  Continuing with legacy script...\n");
+
     const [deployer] = await ethers.getSigners();
     console.log("Deploying contracts with account:", deployer.address);
 
@@ -88,7 +120,7 @@ async function main() {
         }
     }
 
-    console.log("\n=== Deployment Summary ===");
+    console.log("\n=== Legacy Deployment Summary ===");
     console.log(`🏦 MultiTokenVault: ${vaultAddress}`);
     console.log(`💰 Underlying Asset: USDC (${config.usdc})`);
     console.log(`🔮 Oracle: Pyth (${config.pyth})`);
@@ -104,20 +136,9 @@ async function main() {
         console.log(`• ETH: ${config.ethToken} (Pyth oracle: ${PRICE_IDS.ETH.slice(0, 10)}...)`);
     }
 
-    console.log("\n=== Usage ===");
-    console.log("Users can:");
-    console.log("• Deposit USDC → 1:1 conversion to vault shares");
-    if (config.btcToken || config.ethToken) {
-        console.log("• Deposit BTC/ETH tokens → Pyth oracle conversion to USDC equivalent shares");
-    }
-    console.log("• Withdraw only USDC (ERC4626 standard)");
-    console.log("• Earn yield through strategy execution");
-
-    console.log("\n=== Environment Variables Used ===");
-    console.log("USDC_ADDRESS:", process.env.USDC_ADDRESS || "Not set (using default)");
-    console.log("PYTH_ADDRESS:", process.env.PYTH_ADDRESS || "Not set (using default)");
-    console.log("BTC_TOKEN_ADDRESS:", process.env.BTC_TOKEN_ADDRESS || "Not set");
-    console.log("ETH_TOKEN_ADDRESS:", process.env.ETH_TOKEN_ADDRESS || "Not set");
+    console.log("\n🚀 RECOMMENDATION:");
+    console.log("Switch to the new unified deployment system for future deployments:");
+    console.log("npx hardhat run scripts/deployTokensAndVault.ts --network <NETWORK>");
 }
 
 main()
