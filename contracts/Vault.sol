@@ -141,6 +141,33 @@ contract Vault is Ownable, ERC4626, AccessControl {
     }
 
     /**
+     * @dev Deposits assets to a strategy and executes it
+     * @param strategy The address of the strategy to deposit to
+     * @param amount The amount of assets to deposit
+     * @param data Additional data for the strategy execution
+     */
+    function depositToStrategy(
+        address strategy,
+        uint256 amount,
+        bytes calldata data
+    ) external onlyAgent {
+        if (!isStrategy[strategy]) revert StrategyDoesNotExist();
+        if (amount == 0) revert InvalidAddress(); // Reusing error for zero amount
+
+        // Check vault has enough assets
+        uint256 vaultBalance = IERC20(asset()).balanceOf(address(this));
+        if (vaultBalance < amount) revert InsufficientBalance();
+
+        // Approve strategy to spend vault's tokens
+        IERC20(asset()).approve(strategy, amount);
+
+        // Call strategy execute function
+        IStrategies(strategy).execute(amount, data);
+
+        emit StrategyExecuted(strategy, data);
+    }
+
+    /**
      * @dev Harvests rewards from a strategy
      * @param strategy The address of the strategy to harvest from
      * @param data The data to pass to the strategy

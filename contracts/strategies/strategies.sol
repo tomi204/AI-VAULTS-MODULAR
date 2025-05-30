@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 /**
  * @title GenericStrategyImplementation
  * @dev Implementation of the IStrategy interface that can interact with any protocol via function selectors
- * @notice This is a generic implementation that can be reused for multiple protocols
+ * @notice This is a completely generic implementation that can be reused for any protocol
  * @custom:security-contact security@vaults.com
  */
 contract Strategies is ReentrancyGuard {
@@ -27,7 +27,7 @@ contract Strategies is ReentrancyGuard {
     address public vault;
     bool public paused;
 
-    // Optional secondary token mappings for rewards and protocol tokens
+    // Optional secondary token mappings for rewards
     mapping(address => bool) public knownRewardTokens;
     address[] public rewardTokensList;
 
@@ -135,83 +135,37 @@ contract Strategies is ReentrancyGuard {
     ) external onlyAgent nonReentrant whenNotPaused {
         if (amount == 0) revert InvalidAmount();
 
-        // Record token balances before execution
-        uint256 underlyingBalanceBefore = IERC20(underlyingToken).balanceOf(
-            address(this)
-        );
-
         // Handle the token transfer first
         IERC20(underlyingToken).safeTransferFrom(vault, address(this), amount);
 
-        // Approve protocol to spend tokens - optimized to clear only if needed
+        // Approve protocol to spend tokens
         uint256 currentAllowance = IERC20(underlyingToken).allowance(
             address(this),
             protocol
         );
         if (currentAllowance < amount) {
             if (currentAllowance > 0) {
-                IERC20(underlyingToken).forceApprove(protocol, 0);
+                IERC20(underlyingToken).approve(protocol, 0);
             }
-            IERC20(underlyingToken).forceApprove(protocol, amount);
+            IERC20(underlyingToken).approve(protocol, amount);
         }
 
-        // Build calldata for the protocol interaction
+        // Use provided data or build default calldata
         bytes memory callData;
         if (data.length > 0) {
-            // Use provided data if available
             callData = data;
         } else {
-            // Build default calldata using the deposit selector
-            // This supports protocols with different parameter configurations
-
-            // Handle protocols with simple deposit(uint256)
-            if (bytes4(keccak256("deposit(uint256)")) == depositSelector) {
-                callData = abi.encodeWithSelector(depositSelector, amount);
-            }
-            // Handle protocols with deposit(address,uint256,address,uint16) like Aave
-            else if (
-                bytes4(keccak256("deposit(address,uint256,address,uint16)")) ==
-                depositSelector ||
-                bytes4(keccak256("supply(address,uint256,address,uint16)")) ==
-                depositSelector
-            ) {
-                callData = abi.encodeWithSelector(
-                    depositSelector,
-                    underlyingToken,
-                    amount,
-                    address(this),
-                    0 // referralCode
-                );
-            }
-            // Handle protocols with deposit(address,uint256,address) like Compound
-            else if (
-                bytes4(keccak256("deposit(address,uint256,address)")) ==
-                depositSelector
-            ) {
-                callData = abi.encodeWithSelector(
-                    depositSelector,
-                    underlyingToken,
-                    amount,
-                    address(this)
-                );
-            }
-            // Default fallback - attempt to encode with minimal params
-            else {
-                callData = abi.encodeWithSelector(depositSelector, amount);
-            }
+            // Default: just use the selector with amount
+            callData = abi.encodeWithSelector(depositSelector, amount);
         }
 
-        // Execute the deposit with gas optimization - no memory expansion in the hot path
-        bool success;
-        bytes memory result;
-        (success, result) = protocol.call(callData);
+        // Execute the deposit
+        (bool success, bytes memory result) = protocol.call(callData);
 
-        // Handle failure with minimal gas usage
         if (!success) {
             // Revoke approval for security
-            IERC20(underlyingToken).forceApprove(protocol, 0);
+            IERC20(underlyingToken).approve(protocol, 0);
 
-            // Extract error message with minimal gas
             bytes memory revertReason;
             if (result.length > 0) {
                 assembly {
@@ -219,19 +173,6 @@ contract Strategies is ReentrancyGuard {
                 }
             }
             revert DepositFailed(revertReason);
-        }
-
-        // Verify tokens were actually transferred - important for security
-        uint256 underlyingBalanceAfter = IERC20(underlyingToken).balanceOf(
-            address(this)
-        );
-        if (underlyingBalanceAfter > underlyingBalanceBefore) {
-            uint256 difference = underlyingBalanceAfter -
-                underlyingBalanceBefore;
-            if (difference < amount) {
-                // Some tokens remained, adjust approval for security
-                IERC20(underlyingToken).forceApprove(protocol, 0);
-            }
         }
 
         // Forward any reward tokens that might have been received
@@ -253,19 +194,24 @@ contract Strategies is ReentrancyGuard {
     /**
      * @dev Gets the current balance of the strategy in the protocol
      * @return uint256 Balance of the strategy
-     * @notice This function retrieves the protocol balance using the appropriate method for the protocol
+     * @notice This function retrieves the protocol balance using the provided selector
      */
     function getBalance() public view returns (uint256) {
-        // If no protocol or no token, return 0
         if (protocol == address(0) || underlyingToken == address(0)) {
             return 0;
         }
 
-        // Gas-optimized balance retrieval cascade
-        // Try the different protocol interfaces in a gas-efficient manner
-
-        // 1. Try direct static call without parameters (most common)
+        // Try with address parameter first (most common)
         (bool success, bytes memory result) = protocol.staticcall(
+            abi.encodeWithSelector(getBalanceSelector, address(this))
+        );
+
+        if (success && result.length >= 32) {
+            return abi.decode(result, (uint256));
+        }
+
+        // Try without parameters
+        (success, result) = protocol.staticcall(
             abi.encodeWithSelector(getBalanceSelector)
         );
 
@@ -273,7 +219,7 @@ contract Strategies is ReentrancyGuard {
             return abi.decode(result, (uint256));
         }
 
-        // 2. Try with token and address parameters
+        // Try with token and address parameters
         (success, result) = protocol.staticcall(
             abi.encodeWithSelector(
                 getBalanceSelector,
@@ -286,23 +232,6 @@ contract Strategies is ReentrancyGuard {
             return abi.decode(result, (uint256));
         }
 
-        // 3. Try to handle Aave-like protocols
-        // These typically use the aToken pattern
-        (success, result) = protocol.staticcall(
-            abi.encodeWithSelector(
-                bytes4(keccak256("getAToken(address)")),
-                underlyingToken
-            )
-        );
-
-        if (success && result.length >= 32) {
-            address aToken = abi.decode(result, (address));
-            if (aToken != address(0)) {
-                return IERC20(aToken).balanceOf(address(this));
-            }
-        }
-
-        // Return 0 as last resort - safe in view functions
         return 0;
     }
 
@@ -313,61 +242,24 @@ contract Strategies is ReentrancyGuard {
     function emergencyExit(
         bytes calldata data
     ) external onlyAgent nonReentrant {
-        // Get balance from protocol
         uint256 balance = getBalance();
 
         if (balance == 0) {
             revert NoUnderlyingBalance();
         }
 
-        // Build calldata for withdraw with optimal protocol pattern matching
+        // Use provided data or build default calldata
         bytes memory callData;
-
         if (data.length > 0) {
-            // Use provided data if available - highest priority
             callData = data;
         } else {
-            // Handle different protocol interfaces
-
-            // Handle basic withdraw(uint256)
-            if (bytes4(keccak256("withdraw(uint256)")) == withdrawSelector) {
-                callData = abi.encodeWithSelector(withdrawSelector, balance);
-            }
-            // Handle withdraw(address,uint256,address) like Aave
-            else if (
-                bytes4(keccak256("withdraw(address,uint256,address)")) ==
-                withdrawSelector
-            ) {
-                callData = abi.encodeWithSelector(
-                    withdrawSelector,
-                    underlyingToken,
-                    balance,
-                    address(this)
-                );
-            }
-            // Handle withdraw(uint256,address) like some protocols
-            else if (
-                bytes4(keccak256("withdraw(uint256,address)")) ==
-                withdrawSelector
-            ) {
-                callData = abi.encodeWithSelector(
-                    withdrawSelector,
-                    balance,
-                    address(this)
-                );
-            }
-            // Default fallback with minimal params
-            else {
-                callData = abi.encodeWithSelector(withdrawSelector, balance);
-            }
+            // Default: just use the selector with balance
+            callData = abi.encodeWithSelector(withdrawSelector, balance);
         }
 
-        // Execute the withdraw with maximal gas efficiency
-        bool success;
-        bytes memory result;
-        (success, result) = protocol.call(callData);
+        // Execute the withdraw
+        (bool success, bytes memory result) = protocol.call(callData);
 
-        // Handle failure efficiently
         if (!success) {
             bytes memory revertReason;
             if (result.length > 0) {
@@ -392,45 +284,24 @@ contract Strategies is ReentrancyGuard {
      * @dev Claims rewards from the protocol
      * @param data Additional data needed for claiming rewards
      */
-    function claimRewards(bytes calldata data) public onlyAgent nonReentrant {
+    function claimRewards(bytes calldata data) public onlyAgent {
         // Skip if claimSelector is not set
         if (claimSelector == bytes4(0)) {
             return;
         }
 
-        // Build calldata for claim with optimal pattern matching
+        // Use provided data or build default calldata
         bytes memory callData;
-
         if (data.length > 0) {
-            // Use provided data if available
             callData = data;
         } else {
-            // Handle different protocol interfaces
-
-            // Basic claim() with no params
-            if (bytes4(keccak256("claim()")) == claimSelector) {
-                callData = abi.encodeWithSelector(claimSelector);
-            }
-            // claimRewards(address) - most common pattern
-            else if (
-                bytes4(keccak256("claimRewards(address)")) == claimSelector
-            ) {
-                callData = abi.encodeWithSelector(claimSelector, address(this));
-            }
-            // getReward() - common in some protocols
-            else if (bytes4(keccak256("getReward()")) == claimSelector) {
-                callData = abi.encodeWithSelector(claimSelector);
-            }
-            // Default with minimal params
-            else {
-                callData = abi.encodeWithSelector(claimSelector, address(this));
-            }
+            // Default: just use the selector
+            callData = abi.encodeWithSelector(claimSelector);
         }
 
-        // Execute the claim with minimal gas usage
+        // Execute the claim
         (bool success, bytes memory result) = protocol.call(callData);
 
-        // Handle failure - not critical, just emit event
         if (!success) {
             bytes memory revertReason;
             if (result.length > 0) {
@@ -442,46 +313,10 @@ contract Strategies is ReentrancyGuard {
             return;
         }
 
-        // Forward reward tokens with optimal gas usage
+        // Forward reward tokens
         _forwardRewardTokens();
 
         emit Claim(0);
-    }
-
-    /**
-     * @dev Internal helper to detect and forward Aave reward tokens
-     * @notice Gas optimized for Aave protocol compatibility
-     */
-    function _detectAndForwardAaveRewards() internal {
-        // Try to get the reward token address from the protocol
-        (bool success, bytes memory returnData) = protocol.staticcall(
-            abi.encodeWithSelector(bytes4(keccak256("rewardToken()")))
-        );
-
-        if (success && returnData.length >= 32) {
-            address rewardTokenAddress = abi.decode(returnData, (address));
-
-            if (rewardTokenAddress != address(0)) {
-                // Add it to known tokens if not already there
-                if (!knownRewardTokens[rewardTokenAddress]) {
-                    knownRewardTokens[rewardTokenAddress] = true;
-                    rewardTokensList.push(rewardTokenAddress);
-                    emit RewardTokenAdded(rewardTokenAddress);
-                }
-
-                // Forward any balance with minimal gas overhead
-                uint256 rewardBalance = IERC20(rewardTokenAddress).balanceOf(
-                    address(this)
-                );
-                if (rewardBalance > 0) {
-                    IERC20(rewardTokenAddress).safeTransfer(
-                        vault,
-                        rewardBalance
-                    );
-                    emit TokensForwarded(rewardTokenAddress, rewardBalance);
-                }
-            }
-        }
     }
 
     /**
@@ -491,8 +326,10 @@ contract Strategies is ReentrancyGuard {
     function _forwardRewardTokens() internal {
         uint256 tokenCount = rewardTokensList.length;
 
-        // Optimize for the common case of few tokens
-        for (uint256 i = 0; i < tokenCount; i++) {
+        // Limit to avoid gas issues
+        uint256 maxTokens = tokenCount > 10 ? 10 : tokenCount;
+
+        for (uint256 i = 0; i < maxTokens; i++) {
             address tokenAddress = rewardTokensList[i];
             uint256 balance = IERC20(tokenAddress).balanceOf(address(this));
             if (balance > 0) {
@@ -500,9 +337,6 @@ contract Strategies is ReentrancyGuard {
                 emit TokensForwarded(tokenAddress, balance);
             }
         }
-
-        // Try to detect and forward Aave rewards
-        _detectAndForwardAaveRewards();
     }
 
     /**
@@ -527,16 +361,10 @@ contract Strategies is ReentrancyGuard {
     ) external view returns (bytes memory) {
         require(protocol != address(0), "Protocol not set");
 
-        // Build calldata combining the selector and parameters
         bytes memory callData = abi.encodePacked(selector, params);
-
-        // Execute the query as a static call (view)
         (bool success, bytes memory result) = protocol.staticcall(callData);
 
-        // Handle failure
         require(success, "Protocol query failed");
-
-        // Return raw results
         return result;
     }
 }

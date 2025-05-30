@@ -84,6 +84,18 @@ interface IVault is IERC20, IERC20Metadata {
     function executeStrategy(address strategy, bytes calldata data) external;
 
     /**
+     * @dev Deposits assets to a strategy and executes it
+     * @param strategy The address of the strategy to deposit to
+     * @param amount The amount of assets to deposit
+     * @param data Additional data for the strategy execution
+     */
+    function depositToStrategy(
+        address strategy,
+        uint256 amount,
+        bytes calldata data
+    ) external;
+
+    /**
      * @dev Deposits assets into the vault
      * @param assets The amount of assets to deposit
      * @param receiver The address to receive the shares
