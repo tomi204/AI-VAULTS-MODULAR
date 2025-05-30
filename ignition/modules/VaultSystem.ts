@@ -8,19 +8,25 @@ export default buildModule("VaultSystemModule", (m) => {
   const agent = m.getAccount(2);
 
   // Deploy underlying token
-  const underlyingToken = m.contract("MockToken", ["Underlying Token", "UNDER"]);
+  const underlyingToken = m.contract("MockToken", ["Underlying Token", "UNDER"], {
+    id: "UnderlyingToken"
+  });
   m.call(underlyingToken, "mint", [deployer, parseEther("1000000")], {
     id: "mintUnderlyingTokens"
   });
 
   // Deploy reward token  
-  const rewardToken = m.contract("MockToken", ["Reward Token", "REWARD"]);
+  const rewardToken = m.contract("MockToken", ["Reward Token", "REWARD"], {
+    id: "RewardToken"
+  });
   m.call(rewardToken, "mint", [deployer, parseEther("1000000")], {
     id: "mintRewardTokens"
   });
 
   // Deploy mock protocol
-  const mockProtocol = m.contract("MockProtocol", [underlyingToken, rewardToken]);
+  const mockProtocol = m.contract("MockProtocol", [underlyingToken, rewardToken], {
+    id: "MockProtocol"
+  });
 
   // Deploy vault
   const vault = m.contract("Vault", [
@@ -29,7 +35,9 @@ export default buildModule("VaultSystemModule", (m) => {
     "vDEFI", 
     manager,
     agent
-  ]);
+  ], {
+    id: "Vault"
+  });
 
   // Deploy strategy
   const strategies = m.contract("Strategies", [
@@ -39,7 +47,9 @@ export default buildModule("VaultSystemModule", (m) => {
     id("withdraw(uint256)").slice(0, 10),
     id("claimRewards()").slice(0, 10),
     id("getBalance(address)").slice(0, 10)
-  ]);
+  ], {
+    id: "Strategies"
+  });
 
   // Set vault in strategy
   m.call(strategies, "setVault", [vault], {
