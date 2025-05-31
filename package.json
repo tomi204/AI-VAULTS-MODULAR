@@ -1,5 +1,27 @@
 {
   "name": "hardhat-project",
+  "scripts": {
+    "deploy:simple": "npx hardhat run scripts/deploy-simple-vault.ts",
+    "tokens:simple": "npx hardhat run scripts/get-simple-vault-tokens.ts",
+    "status:simple": "npx hardhat run scripts/simple-vault-status.ts",
+    "interact:simple": "npx hardhat run scripts/interact-simple-vault.ts",
+    "deploy:simple:flow": "npx hardhat run scripts/deploy-simple-vault.ts --network flow",
+    "deploy:simple:flow-testnet": "npx hardhat run scripts/deploy-simple-vault.ts --network flowTestnet",
+    "deploy:simple:rootstock": "npx hardhat run scripts/deploy-simple-vault.ts --network rootstock",
+    "deploy:simple:rootstock-testnet": "npx hardhat run scripts/deploy-simple-vault.ts --network rootstockTestnet",
+    "tokens:simple:flow": "npx hardhat run scripts/get-simple-vault-tokens.ts --network flow",
+    "tokens:simple:flow-testnet": "npx hardhat run scripts/get-simple-vault-tokens.ts --network flowTestnet",
+    "tokens:simple:rootstock": "npx hardhat run scripts/get-simple-vault-tokens.ts --network rootstock",
+    "tokens:simple:rootstock-testnet": "npx hardhat run scripts/get-simple-vault-tokens.ts --network rootstockTestnet",
+    "status:simple:flow": "npx hardhat run scripts/simple-vault-status.ts --network flow",
+    "status:simple:flow-testnet": "npx hardhat run scripts/simple-vault-status.ts --network flowTestnet",
+    "status:simple:rootstock": "npx hardhat run scripts/simple-vault-status.ts --network rootstock",
+    "status:simple:rootstock-testnet": "npx hardhat run scripts/simple-vault-status.ts --network rootstockTestnet",
+    "interact:simple:flow": "npx hardhat run scripts/interact-simple-vault.ts --network flow",
+    "interact:simple:flow-testnet": "npx hardhat run scripts/interact-simple-vault.ts --network flowTestnet",
+    "interact:simple:rootstock": "npx hardhat run scripts/interact-simple-vault.ts --network rootstock",
+    "interact:simple:rootstock-testnet": "npx hardhat run scripts/interact-simple-vault.ts --network rootstockTestnet"
+  },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "hardhat": "^2.24.1"

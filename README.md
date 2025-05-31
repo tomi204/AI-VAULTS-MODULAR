@@ -1,326 +1,461 @@
-# 🏦 MultiTokenVault
+# 🤖 AI-Powered Vaults
 
-A sophisticated ERC4626-compliant vault that accepts multiple tokens (USDC, WBTC, WETH) and uses Pyth Network oracles for real-time price conversion. All deposits are converted to USDC equivalents for unified vault management.
+> **Advanced DeFi vault system with AI-driven strategy execution and multi-chain support**
 
-## ✨ Features
+## 📋 Overview
 
-- **🪙 Multi-Token Support**: Accept USDC, WBTC, WETH deposits
-- **🔮 Pyth Oracle Integration**: Real-time price feeds for accurate conversions
-- **🏦 ERC4626 Compliant**: Standard vault interface for maximum compatibility
-- **🔐 Role-Based Access Control**: Manager/Agent roles for secure operations
-- **⚡ Strategy Integration**: Execute yield-generating strategies
-- **🧪 Testing Ready**: Built-in mock tokens with faucet functions
-- **🌐 Multi-Chain**: Deploy on any Pyth-supported blockchain
+AI-Powered Vaults is a sophisticated DeFi protocol that combines traditional ERC4626 vault functionality with AI-driven strategy execution. The system allows users to deposit assets into vaults while AI agents automatically optimize yield through whitelisted strategies including swaps, lending, and other DeFi protocols.
+
+### 🔒 Security First
+
+- **Funds never leave the protocol**: AI agents can only execute pre-approved strategies within the smart contract ecosystem
+- **Whitelisted strategies only**: Only admin/manager approved strategies can be executed
+- **Role-based access control**: Clear separation between users, managers, and agents
+- **Non-custodial**: Users maintain full ownership of their assets
 
 ## 🏗️ Architecture
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   User Tokens   │    │ MultiTokenVault  │    │  Pyth Oracle    │
-│                 │    │                  │    │                 │
-│ • USDC (1:1)    │────│ • ERC4626 Vault  │────│ • Price Feeds   │
-│ • WBTC (oracle) │    │ • Role Control   │    │ • BTC/USD       │
-│ • WETH (oracle) │    │ • Multi-token    │    │ • ETH/USD       │
-│                 │    │ • Strategies     │    │ • USDC/USD      │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-```
+### Core Components
+
+#### 1. **Simple Vault** (`Vault.sol`)
+
+- Standard ERC4626 vault for single-asset deposits (USDC)
+- Role-based access control (Manager, Agent)
+- Strategy execution capabilities
+- Perfect for straightforward yield farming
+
+#### 2. **Multi-Token Vault** (`MultiTokenVault.sol`)
+
+- Accepts multiple ERC20 tokens (USDC, WBTC, WETH)
+- Pyth oracle integration for price feeds
+- Automatic token conversion to USDC equivalent
+- Advanced multi-asset management
+
+#### 3. **Strategy System**
+
+- Whitelisted strategy contracts
+- AI agent execution through secure interfaces
+- Harvest and emergency exit capabilities
+- Transparent fund management
+
+### 🌐 Supported Networks
+
+| Network               | Chain ID | Status    | RPC                                    |
+| --------------------- | -------- | --------- | -------------------------------------- |
+| **Flow Mainnet**      | 545      | ✅ Active | `https://mainnet.evm.nodes.onflow.org` |
+| **Flow Testnet**      | 545      | ✅ Active | `https://testnet.evm.nodes.onflow.org` |
+| **Rootstock Mainnet** | 30       | ✅ Active | `https://public-node.rsk.co`           |
+| **Rootstock Testnet** | 31       | ✅ Active | `https://public-node.testnet.rsk.co`   |
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js v18+
-- Hardhat development environment
-- Private key with gas tokens
-- Pyth Network oracle address for your blockchain
-
-### Installation
-
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd multitokenvault
-
 # Install dependencies
 npm install
 
-# Setup environment
-cp env.example .env
-# Edit .env with your configuration
+# Configure environment
+cp .env.example .env
+# Add your PRIV_KEY to .env file
 ```
 
-### Deploy
+### 1. Deploy Simple Vault (Single Asset)
+
+#### Flow Mainnet
 
 ```bash
-# Deploy to any supported network
-npx hardhat run scripts/deployTokensAndVault.ts --network <NETWORK>
+# Deploy contracts
+npm run deploy:simple:flow
 
-# Examples:
-npx hardhat run scripts/deployTokensAndVault.ts --network flow
-npx hardhat run scripts/deployTokensAndVault.ts --network ethereum
-npx hardhat run scripts/deployTokensAndVault.ts --network arbitrum
+# Get test tokens
+npm run tokens:simple:flow
+
+# Check status
+npm run status:simple:flow
+
+# Interact with vault
+npm run interact:simple:flow
 ```
 
-## 💰 How It Works
-
-### Deposit Process
-
-1. **USDC Deposits**: Direct 1:1 conversion to vault shares
-2. **WBTC/WETH Deposits**: Pyth oracle converts to USDC equivalent
-3. **Share Minting**: ERC4626 shares minted based on USDC value
-4. **Yield Generation**: Deposits used in strategies for yield
-
-### Price Conversion Example
-
-```solidity
-// User deposits 1 WBTC when BTC = $45,000
-// Vault converts: 1 WBTC → 45,000 USDC equivalent
-// Shares minted based on 45,000 USDC value
-vault.depositToken(wbtcAddress, 1e8, userAddress);
-```
-
-## 📋 Supported Networks
-
-| Network  | Status | Pyth Oracle    | Mock Tokens     |
-| -------- | ------ | -------------- | --------------- |
-| Ethereum | ✅     | Pre-configured | Always deployed |
-| Arbitrum | ✅     | Pre-configured | Always deployed |
-| Base     | ✅     | Pre-configured | Always deployed |
-| Flow     | ✅     | Manual config  | Always deployed |
-| Testnets | ✅     | Pre-configured | Always deployed |
-
-## 🎯 Usage Examples
-
-### Basic Deposits
-
-```solidity
-// USDC deposit (1:1)
-vault.deposit(1000 * 1e6, receiver);
-
-// WBTC deposit (with oracle)
-vault.depositToken(wbtcAddress, 1 * 1e8, receiver);
-
-// WETH deposit (with oracle)
-vault.depositToken(wethAddress, 10 * 1e18, receiver);
-```
-
-### Withdrawals
-
-```solidity
-// Always withdraw USDC (base asset)
-vault.withdraw(1000 * 1e6, receiver, owner);
-vault.redeem(shares, receiver, owner);
-```
-
-### Testing with Mock Tokens
-
-```solidity
-// Get test tokens from faucets
-MockUSDC(usdcAddress).faucet(10000 * 1e6);   // 10k USDC
-MockWBTC(wbtcAddress).faucet(1 * 1e8);       // 1 WBTC
-MockWETH(wethAddress).faucet(10 * 1e18);     // 10 WETH
-```
-
-### Strategy Management (Manager Role)
-
-```solidity
-// Add strategy
-vault.addStrategy(strategyAddress);
-
-// Configure new tokens
-vault.configureToken(tokenAddress, pythPriceId, decimals);
-```
-
-### Strategy Execution (Agent Role)
-
-```solidity
-// Execute strategy
-vault.executeStrategy(strategyAddress, data);
-
-// Deposit to strategy
-vault.depositToStrategy(strategyAddress, amount, data);
-
-// Harvest rewards
-vault.harvestStrategy(strategyAddress, data);
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Key variables for deployment:
+#### Flow Testnet
 
 ```bash
-# Required
-PRIV_KEY=your_private_key
+# Deploy contracts
+npm run deploy:simple:flow-testnet
 
-# Network-specific Pyth addresses
-ETHEREUM_PYTH_ADDRESS=0x4305FB66699C3B2702D4d05CF36551390A4c69C6
-ARBITRUM_PYTH_ADDRESS=0xff1a0f4744e8582DF1aE09D5611b887B6a12925C
-BASE_PYTH_ADDRESS=0x8250f4aF4B972684F7b336503E2D6dFeDeB1487a
-FLOW_PYTH_ADDRESS=your_flow_pyth_address
+# Get test tokens
+npm run tokens:simple:flow-testnet
 
-# Optional
-VAULT_NAME=Multi-Token Vault
-VAULT_SYMBOL=mtvUSDC
-MANAGER_ADDRESS=manager_address
-AGENT_ADDRESS=agent_address
+# Check status
+npm run status:simple:flow-testnet
+
+# Interact with vault
+npm run interact:simple:flow-testnet
 ```
 
-### Pyth Price IDs
-
-Universal price feed identifiers:
+#### Rootstock Mainnet
 
 ```bash
-BTC_USD_PRICE_ID=0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43
-ETH_USD_PRICE_ID=0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace
-USDC_USD_PRICE_ID=0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a
+# Deploy contracts
+npm run deploy:simple:rootstock
+
+# Get test tokens
+npm run tokens:simple:rootstock
+
+# Check status
+npm run status:simple:rootstock
+
+# Interact with vault
+npm run interact:simple:rootstock
 ```
 
-## 🧪 Testing
-
-### Running Tests
+#### Rootstock Testnet
 
 ```bash
-# Run all tests
-npx hardhat test
+# Deploy contracts
+npm run deploy:simple:rootstock-testnet
 
-# Run specific test file
-npx hardhat test test/MultiTokenVault.test.ts
+# Get test tokens
+npm run tokens:simple:rootstock-testnet
 
-# Run with gas reporting
-REPORT_GAS=true npx hardhat test
+# Check status
+npm run status:simple:rootstock-testnet
+
+# Interact with vault
+npm run interact:simple:rootstock-testnet
 ```
 
-### Test Coverage
+### 2. Deploy Multi-Token Vault (Multi Asset)
 
-The test suite covers:
+#### Flow Testnet
 
-- ✅ Multi-token deposits and withdrawals
-- ✅ Pyth oracle price conversions
-- ✅ Role-based access control
-- ✅ Strategy management
-- ✅ Error handling and edge cases
-- ✅ ERC4626 compliance
+```bash
+# Deploy complete system
+npx hardhat run scripts/deploy-vault-system.ts --network flowTestnet
+
+# Get test tokens
+npx hardhat run scripts/get-test-tokens.ts --network flowTestnet
+
+# Check status
+npx hardhat run scripts/vault-status.ts --network flowTestnet
+
+# Interact with vault
+npx hardhat run scripts/interact-vault.ts --network flowTestnet
+```
+
+#### Flow Mainnet
+
+```bash
+# Deploy complete system
+npx hardhat run scripts/deploy-vault-system.ts --network flow
+
+# Get test tokens (if available)
+npx hardhat run scripts/get-test-tokens.ts --network flow
+
+# Check status
+npx hardhat run scripts/vault-status.ts --network flow
+
+# Interact with vault
+npx hardhat run scripts/interact-vault.ts --network flow
+```
 
 ## 📁 Project Structure
 
 ```
 ├── contracts/
-│   ├── MultiTokenVault.sol      # Main vault contract
-│   ├── Vault.sol               # Base vault implementation
+│   ├── Vault.sol                    # Simple ERC4626 vault
+│   ├── MultiTokenVault.sol          # Multi-token vault with oracles
 │   ├── interfaces/
-│   │   └── Strategies.sol      # Strategy interface
-│   └── mocks/
-│       ├── MockUSDC.sol        # Mock USDC with faucet
-│       ├── MockWBTC.sol        # Mock WBTC with faucet
-│       └── MockWETH.sol        # Mock WETH with faucet
+│   │   └── Strategies.sol           # Strategy interface
+│   └── mocks/                       # Test tokens
 ├── scripts/
-│   ├── deployTokensAndVault.ts # Main deployment script
-│   └── deployMultiTokenVault.ts # Legacy deployment
-├── test/
-│   └── MultiTokenVault.test.ts # Comprehensive test suite
-├── README_DEPLOYMENT.md        # Detailed deployment guide
-└── README.md                   # This file
+│   ├── deploy-simple-vault.ts       # Simple vault deployment
+│   ├── deploy-vault-system.ts       # Multi-token system deployment
+│   ├── interact-simple-vault.ts     # Simple vault interactions
+│   ├── interact-vault.ts            # Multi-token vault interactions
+│   ├── get-simple-vault-tokens.ts   # Get test tokens (simple)
+│   ├── get-test-tokens.ts           # Get test tokens (multi)
+│   ├── simple-vault-status.ts       # Simple vault status
+│   └── vault-status.ts              # Multi-token vault status
+├── deployments.json                 # Contract addresses registry
+├── hardhat.config.ts               # Network configurations
+└── package.json                    # NPM scripts
 ```
+
+## 🔧 Available Commands
+
+### Simple Vault Commands
+
+| Command                                     | Description                           |
+| ------------------------------------------- | ------------------------------------- |
+| `npm run deploy:simple`                     | Deploy to localhost                   |
+| `npm run deploy:simple:flow`                | Deploy to Flow mainnet                |
+| `npm run deploy:simple:flow-testnet`        | Deploy to Flow testnet                |
+| `npm run deploy:simple:rootstock`           | Deploy to Rootstock mainnet           |
+| `npm run deploy:simple:rootstock-testnet`   | Deploy to Rootstock testnet           |
+| `npm run tokens:simple:flow`                | Get test tokens on Flow mainnet       |
+| `npm run tokens:simple:flow-testnet`        | Get test tokens on Flow testnet       |
+| `npm run tokens:simple:rootstock`           | Get test tokens on Rootstock mainnet  |
+| `npm run tokens:simple:rootstock-testnet`   | Get test tokens on Rootstock testnet  |
+| `npm run status:simple:flow`                | Check Flow mainnet status             |
+| `npm run status:simple:flow-testnet`        | Check Flow testnet status             |
+| `npm run status:simple:rootstock`           | Check Rootstock mainnet status        |
+| `npm run status:simple:rootstock-testnet`   | Check Rootstock testnet status        |
+| `npm run interact:simple:flow`              | Interact with Flow mainnet vault      |
+| `npm run interact:simple:flow-testnet`      | Interact with Flow testnet vault      |
+| `npm run interact:simple:rootstock`         | Interact with Rootstock mainnet vault |
+| `npm run interact:simple:rootstock-testnet` | Interact with Rootstock testnet vault |
+
+### Multi-Token Vault Commands
+
+```bash
+# Deploy multi-token system
+npx hardhat run scripts/deploy-vault-system.ts --network <network>
+
+# Get test tokens
+npx hardhat run scripts/get-test-tokens.ts --network <network>
+
+# Check vault status
+npx hardhat run scripts/vault-status.ts --network <network>
+
+# Interact with vault
+npx hardhat run scripts/interact-vault.ts --network <network>
+```
+
+## 💡 How It Works
+
+### 1. **User Deposits**
+
+Users deposit assets (USDC for simple vault, or USDC/WBTC/WETH for multi-token vault) and receive vault shares representing their ownership.
+
+### 2. **AI Strategy Execution**
+
+AI agents analyze market conditions and execute pre-approved strategies:
+
+- **Lending protocols** (Aave, Compound)
+- **DEX trading** (Uniswap, SushiSwap)
+- **Yield farming** (Various DeFi protocols)
+- **Arbitrage opportunities**
+
+### 3. **Automated Yield Optimization**
+
+The AI continuously monitors and rebalances positions to maximize returns while maintaining risk parameters.
+
+### 4. **Secure Fund Management**
+
+- Funds never leave the smart contract ecosystem
+- All strategies are pre-approved by governance
+- Emergency exit mechanisms available
+- Transparent on-chain execution
 
 ## 🔐 Security Features
 
-### Access Control
+### Role-Based Access Control
 
-- **Owner**: Full contract control and upgrades
-- **Manager**: Token configuration and strategy management
-- **Agent**: Strategy execution and operations
+| Role        | Permissions                             |
+| ----------- | --------------------------------------- |
+| **User**    | Deposit, withdraw, redeem shares        |
+| **Manager** | Add/remove strategies, configure tokens |
+| **Agent**   | Execute strategies, harvest rewards     |
+| **Admin**   | Grant/revoke roles, emergency functions |
 
-### Price Security
+### Strategy Whitelisting
 
-- **Pyth Integration**: Decentralized, high-frequency price feeds
-- **Price Staleness Check**: Configurable maximum age (25 minutes)
-- **Price Validation**: Positive price enforcement
+- Only pre-approved strategies can be executed
+- Strategies undergo security audits
+- Community governance for strategy approval
+- Emergency pause mechanisms
 
-### Vault Security
+### Oracle Integration
 
-- **Reentrancy Protection**: All external calls protected
-- **ERC4626 Compliance**: Standard security patterns
-- **Role Separation**: Clear separation of powers
+- Pyth Network price feeds for accurate valuations
+- Stale price protection (25-minute maximum age)
+- Multiple oracle sources for redundancy
+
+## 📊 Deployment Status
+
+### Current Deployments
+
+#### Flow Testnet
+
+- **MultiTokenVault**: `0x7C65F77a4EbEa3D56368A73A12234bB4384ACB28`
+- **MockUSDC**: `0xAF28B48E48317109F885FEc05751f5422d850857`
+- **MockWBTC**: `0x8fDE7A649c782c96e7f4D9D88490a7C5031F51a9`
+- **MockWETH**: `0xF3B66dEF94Ab0C8D485e36845f068aFB48959A04`
+
+#### Rootstock Testnet
+
+- **Simple Vault**: `0x8fDE7A649c782c96e7f4D9D88490a7C5031F51a9`
+- **MockUSDC**: `0xAF28B48E48317109F885FEc05751f5422d850857`
+
+## 🎯 Usage Examples
+
+### Simple Vault Interaction
+
+```typescript
+// Deploy and interact with simple vault
+npm run deploy:simple:rootstock-testnet
+npm run tokens:simple:rootstock-testnet
+npm run interact:simple:rootstock-testnet
+
+// Expected flow:
+// 1. Deposit 1,000 USDC → Receive vault shares
+// 2. AI executes strategies to generate yield
+// 3. Withdraw 300 USDC → Burn corresponding shares
+// 4. Remaining 700 USDC continues earning yield
+```
+
+### Multi-Token Vault Interaction
+
+```typescript
+// Deploy multi-token system
+npx hardhat run scripts/deploy-vault-system.ts --network flowTestnet
+
+// Get test tokens
+npx hardhat run scripts/get-test-tokens.ts --network flowTestnet
+
+// Interact with vault
+npx hardhat run scripts/interact-vault.ts --network flowTestnet
+
+// Expected flow:
+// 1. Deposit WBTC → Converted to USDC equivalent via Pyth oracle
+// 2. Deposit WETH → Converted to USDC equivalent via Pyth oracle
+// 3. AI optimizes the combined USDC pool across strategies
+// 4. Users can withdraw in USDC equivalent
+```
+
+## 🔍 Monitoring & Analytics
+
+### Vault Status Checking
+
+```bash
+# Simple vault status
+npm run status:simple:rootstock-testnet
+
+# Multi-token vault status
+npx hardhat run scripts/vault-status.ts --network flowTestnet
+```
+
+### Key Metrics Displayed
+
+- **Total Assets**: Total value locked in vault
+- **Total Supply**: Outstanding vault shares
+- **Share Price**: Current value per share
+- **User Balances**: Individual holdings
+- **Strategy Performance**: Active strategy returns
+- **Oracle Status**: Price feed health
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+#### Oracle Price Stale
+
+```
+❌ WBTC Oracle: ❌ (Likely stale price data)
+```
+
+**Solution**: This is normal on testnets. Use USDC deposits which don't require oracles.
+
+#### Insufficient Balance
+
+```
+❌ Insufficient USDC balance. You have 0.0 USDC
+```
+
+**Solution**: Run the token faucet script first:
+
+```bash
+npm run tokens:simple:rootstock-testnet
+```
+
+#### Network Configuration Error
+
+```
+❌ Network not configured in deployments.json
+```
+
+**Solution**: Deploy contracts first:
+
+```bash
+npm run deploy:simple:rootstock-testnet
+```
+
+### Debug Commands
+
+```bash
+# Check all contract statuses
+npm run status:simple:rootstock-testnet
+
+# Get more test tokens
+npm run tokens:simple:rootstock-testnet
+
+# Verify deployment on Flow
+npx hardhat run scripts/vault-status.ts --network flowTestnet
+```
 
 ## 🛠️ Development
 
-### Adding New Tokens
+### Local Development
 
-```solidity
-// Manager can add new supported tokens
-vault.configureToken(
-    tokenAddress,       // ERC20 token address
-    pythPriceId,       // Pyth price feed ID
-    decimals           // Token decimals
-);
+```bash
+# Start local node
+npx hardhat node
+
+# Deploy to localhost
+npm run deploy:simple
+
+# Interact locally
+npm run interact:simple
+```
+
+### Testing
+
+```bash
+# Run tests
+npx hardhat test
+
+# Run specific test
+npx hardhat test test/Vault.test.ts
 ```
 
 ### Adding New Networks
 
-1. Add network to `hardhat.config.ts`
-2. Add Pyth oracle address to `env.example`
-3. Update `NETWORK_CONFIG` in deployment script
-4. Deploy and test
-
-### Custom Strategies
-
-Implement the `IStrategies` interface:
-
-```solidity
-interface IStrategies {
-    function execute(uint256 amount, bytes calldata data) external;
-    function harvest(bytes calldata data) external;
-    function emergencyExit(bytes calldata data) external;
-}
-```
-
-## 📊 Gas Optimization
-
-The contract is optimized for gas efficiency:
-
-- **Packed Structs**: Minimize storage slots
-- **Batch Operations**: Single transaction for multiple operations
-- **Efficient Calculations**: Optimized price conversion math
-- **Minimal External Calls**: Reduce gas costs
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-| Issue                | Solution                                  |
-| -------------------- | ----------------------------------------- |
-| Pyth address not set | Configure `*_PYTH_ADDRESS` in `.env`      |
-| Token not accepted   | Call `configureToken()` with Manager role |
-| Price too old        | Check Pyth oracle is updating prices      |
-| Insufficient balance | Ensure enough tokens for deposit          |
-
-### Debug Mode
-
-```bash
-# Enable debug logging
-DEBUG=true npx hardhat run scripts/deployTokensAndVault.ts --network localhost
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+1. Add network configuration to `hardhat.config.ts`
+2. Add chain configuration to `deployments.json`
+3. Deploy using existing scripts
+4. Update this README with new addresses
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests for new features
+4. Add tests for new functionality
 5. Submit a pull request
 
-## 📞 Support
+## 📄 License
 
-- **Documentation**: See `README_DEPLOYMENT.md` for deployment details
-- **Issues**: Open an issue on GitHub
-- **Discussions**: Use GitHub Discussions for questions
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🔗 Links
+
+- **Documentation**: [Coming Soon]
+- **Discord**: [Coming Soon]
+- **Twitter**: [Coming Soon]
+- **Audit Reports**: [Coming Soon]
 
 ---
 
-**Ready to deploy multi-token yield vaults on any Pyth-supported blockchain!** 🚀
+## 🎉 Success Indicators
+
+After deployment, you should see:
+
+- ✅ All contracts deployed and verified
+- ✅ Test tokens available in your wallet
+- ✅ Ability to deposit and withdraw from vaults
+- ✅ AI strategies executing successfully
+- ✅ Yield generation visible in vault metrics
+
+**Ready to revolutionize DeFi with AI-powered yield optimization!** 🚀

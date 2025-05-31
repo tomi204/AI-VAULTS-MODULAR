@@ -3,50 +3,12 @@
     "localhost": {
       "chainId": 31337,
       "pyth": "0x4305FB66699C3B2702D4d05CF36551390A4c69C6",
-      "tokens": {},
-      "vaults": {}
-    },
-    "sepolia": {
-      "chainId": 11155111,
-      "pyth": "0x4305FB66699C3B2702D4d05CF36551390A4c69C6",
-      "tokens": {},
-      "vaults": {}
-    },
-    "mainnet": {
-      "chainId": 1,
-      "pyth": "0x4305FB66699C3B2702D4d05CF36551390A4c69C6",
-      "tokens": {},
-      "vaults": {}
-    },
-    "arbitrum": {
-      "chainId": 42161,
-      "pyth": "0xff1a0f4744e8582DF1aE09D5611b887B6a12925C",
-      "tokens": {},
-      "vaults": {}
-    },
-    "arbitrumSepolia": {
-      "chainId": 421614,
-      "pyth": "0xff1a0f4744e8582DF1aE09D5611b887B6a12925C",
-      "tokens": {},
-      "vaults": {}
-    },
-    "base": {
-      "chainId": 8453,
-      "pyth": "0x8250f4aF4B972684F7b336503E2D6dFeDeB1487a",
       "tokens": {
-        "MockUSDC": "0xAF28B48E48317109F885FEc05751f5422d850857",
-        "MockWBTC": "0x8fDE7A649c782c96e7f4D9D88490a7C5031F51a9",
-        "MockWETH": "0xF3B66dEF94Ab0C8D485e36845f068aFB48959A04"
+        "MockUSDC": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
       },
       "vaults": {
-        "MultiTokenVault": "0x7C65F77a4EbEa3D56368A73A12234bB4384ACB28"
+        "Vault": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
       }
-    },
-    "baseSepolia": {
-      "chainId": 84532,
-      "pyth": "0x8250f4aF4B972684F7b336503E2D6dFeDeB1487a",
-      "tokens": {},
-      "vaults": {}
     },
     "flow": {
       "chainId": 545,
@@ -64,6 +26,20 @@
       },
       "vaults": {
         "MultiTokenVault": "0x7C65F77a4EbEa3D56368A73A12234bB4384ACB28"
+      }
+    },
+    "rootstock": {
+      "chainId": 30,
+      "tokens": {},
+      "vaults": {}
+    },
+    "rootstockTestnet": {
+      "chainId": 31,
+      "tokens": {
+        "MockUSDC": "0xAF28B48E48317109F885FEc05751f5422d850857"
+      },
+      "vaults": {
+        "Vault": "0x8fDE7A649c782c96e7f4D9D88490a7C5031F51a9"
       }
     }
   },
