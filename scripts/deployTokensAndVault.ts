@@ -1,99 +1,131 @@
 import { ethers, network } from "hardhat";
+import * as dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
 
 // Network configuration - simplified to always deploy mock tokens
 const NETWORK_CONFIG = {
-    ethereum: {
-        pyth: process.env.ETHEREUM_PYTH_ADDRESS,
-    },
-    sepolia: {
-        pyth: process.env.ETHEREUM_PYTH_ADDRESS,
-    },
-    arbitrum: {
-        pyth: process.env.ARBITRUM_PYTH_ADDRESS,
-    },
-    arbitrumSepolia: {
-        pyth: process.env.ARBITRUM_PYTH_ADDRESS,
-    },
-    base: {
-        pyth: process.env.BASE_PYTH_ADDRESS,
-    },
-    baseSepolia: {
-        pyth: process.env.BASE_PYTH_ADDRESS,
-    },
-    flow: {
-        pyth: process.env.FLOW_PYTH_ADDRESS,
-    },
-    flowTestnet: {
-        pyth: process.env.FLOW_TESTNET_PYTH_ADDRESS,
-    },
-    hardhat: {
-        pyth: "0x4305FB66699C3B2702D4d05CF36551390A4c69C6", // Default for testing
-    },
-    localhost: {
-        pyth: "0x4305FB66699C3B2702D4d05CF36551390A4c69C6",
-    },
+  ethereum: {
+    pyth: process.env.ETHEREUM_PYTH_ADDRESS,
+  },
+  sepolia: {
+    pyth: process.env.ETHEREUM_PYTH_ADDRESS,
+  },
+  arbitrum: {
+    pyth: process.env.ARBITRUM_PYTH_ADDRESS,
+  },
+  arbitrumSepolia: {
+    pyth: process.env.ARBITRUM_PYTH_ADDRESS,
+  },
+  base: {
+    pyth: process.env.BASE_PYTH_ADDRESS,
+  },
+  baseSepolia: {
+    pyth: process.env.BASE_PYTH_ADDRESS,
+  },
+  flow: {
+    pyth: process.env.FLOW_PYTH_ADDRESS,
+  },
+  flowTestnet: {
+    pyth: process.env.FLOW_TESTNET_PYTH_ADDRESS,
+  },
+  hardhat: {
+    pyth: "0x4305FB66699C3B2702D4d05CF36551390A4c69C6", // Default for testing
+  },
+  localhost: {
+    pyth: "0x4305FB66699C3B2702D4d05CF36551390A4c69C6",
+  },
 };
 
 // Price IDs (universal across all networks)
 const PRICE_IDS = {
-    BTC: process.env.BTC_USD_PRICE_ID || "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
-    ETH: process.env.ETH_USD_PRICE_ID || "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
-    USDC: process.env.USDC_USD_PRICE_ID || "0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
+  BTC: "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
+  ETH: "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
+  USDC: "0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
 };
 
 async function deployMockTokens() {
-    console.log("\n=== Deploying Mock Tokens ===");
-    
-    const tokens: { [key: string]: string } = {};
+  console.log("\n=== Deploying Mock Tokens ===");
 
-    // Deploy Mock USDC
-    console.log("🪙 Deploying Mock USDC...");
-    const MockUSDC = await ethers.getContractFactory("MockUSDC");
-    const usdc = await MockUSDC.deploy();
-    await usdc.waitForDeployment();
-    tokens.usdc = await usdc.getAddress();
-    console.log(`✅ Mock USDC deployed: ${tokens.usdc}`);
+  const tokens: { [key: string]: string } = {};
 
-    // Deploy Mock WBTC
-    console.log("🪙 Deploying Mock WBTC...");
-    const MockWBTC = await ethers.getContractFactory("MockWBTC");
-    const wbtc = await MockWBTC.deploy();
-    await wbtc.waitForDeployment();
-    tokens.wbtc = await wbtc.getAddress();
-    console.log(`✅ Mock WBTC deployed: ${tokens.wbtc}`);
+  // Deploy Mock USDC
+  console.log("🪙 Deploying Mock USDC...");
+  const MockUSDC = await ethers.getContractFactory("MockUSDC");
+  const usdc = await MockUSDC.deploy();
+  await usdc.waitForDeployment();
+  tokens.usdc = await usdc.getAddress();
+  console.log(`✅ Mock USDC deployed: ${tokens.usdc}`);
 
-    // Deploy Mock WETH
-    console.log("🪙 Deploying Mock WETH...");
-    const MockWETH = await ethers.getContractFactory("MockWETH");
-    const weth = await MockWETH.deploy();
-    await weth.waitForDeployment();
-    tokens.weth = await weth.getAddress();
-    console.log(`✅ Mock WETH deployed: ${tokens.weth}`);
+  // Deploy Mock WBTC
+  console.log("🪙 Deploying Mock WBTC...");
+  const MockWBTC = await ethers.getContractFactory("MockWBTC");
+  const wbtc = await MockWBTC.deploy();
+  await wbtc.waitForDeployment();
+  tokens.wbtc = await wbtc.getAddress();
+  console.log(`✅ Mock WBTC deployed: ${tokens.wbtc}`);
 
-    return tokens;
+  // Deploy Mock WETH
+  console.log("🪙 Deploying Mock WETH...");
+  const MockWETH = await ethers.getContractFactory("MockWETH");
+  const weth = await MockWETH.deploy();
+  await weth.waitForDeployment();
+  tokens.weth = await weth.getAddress();
+  console.log(`✅ Mock WETH deployed: ${tokens.weth}`);
+
+  return tokens;
 }
 
 async function main() {
-    const [deployer] = await ethers.getSigners();
-    const networkName = network.name;
+  console.log("=".repeat(80));
+  console.log(`🚀 DEPLOYING TO: ${network.name.toUpperCase()}`);
+  console.log("=".repeat(80));
 
-    console.log("=".repeat(80));
-    console.log(`🚀 DEPLOYING TO: ${networkName.toUpperCase()}`);
-    console.log("=".repeat(80));
+  // Debug environment and connection
+  console.log("🔍 Debug Info:");
+  console.log(`Network: ${network.name}`);
+  console.log(`PRIV_KEY exists: ${!!process.env.PRIV_KEY}`);
+  console.log(`PRIV_KEY length: ${process.env.PRIV_KEY?.length || 0}`);
+
+  try {
+    console.log("🔍 Getting signers...");
+    const signers = await ethers.getSigners();
+    console.log(`Signers found: ${signers.length}`);
+
+    const [deployer] = signers;
+
+    if (!deployer) {
+      console.log("❌ Deployer is undefined");
+      console.log("Available signers:", signers);
+      throw new Error("❌ No deployer found. Check your PRIV_KEY in .env file");
+    }
+
     console.log(`📍 Deployer: ${deployer.address}`);
-    console.log(`💰 Balance: ${ethers.formatEther(await deployer.provider.getBalance(deployer.address))} ${networkName === 'flow' || networkName === 'flowTestnet' ? 'FLOW' : 'ETH'}`);
+
+    const balance = await deployer.provider.getBalance(deployer.address);
+    const networkName = network.name;
+    console.log(
+      `💰 Balance: ${ethers.formatEther(balance)} ${
+        networkName === "flow" || networkName === "flowTestnet" ? "FLOW" : "ETH"
+      }`
+    );
 
     // Get network configuration
     const config = NETWORK_CONFIG[networkName as keyof typeof NETWORK_CONFIG];
     if (!config) {
-        throw new Error(`❌ Network '${networkName}' not supported. Please add configuration.`);
+      throw new Error(
+        `❌ Network '${networkName}' not supported. Please add configuration.`
+      );
     }
 
     console.log(`✅ Network configuration found for: ${networkName}`);
 
     // Validate required Pyth address
     if (!config.pyth) {
-        throw new Error(`❌ Pyth address not configured for ${networkName}. Please set the environment variable.`);
+      throw new Error(
+        `❌ Pyth address not configured for ${networkName}. Please set FLOW_TESTNET_PYTH_ADDRESS in your .env file.`
+      );
     }
 
     console.log(`🔮 Pyth Oracle: ${config.pyth}`);
@@ -109,7 +141,7 @@ async function main() {
 
     // Deploy MultiTokenVault
     console.log("\n=== Deploying MultiTokenVault ===");
-    
+
     const manager = process.env.MANAGER_ADDRESS || deployer.address;
     const agent = process.env.AGENT_ADDRESS || deployer.address;
     const vaultName = process.env.VAULT_NAME || "Multi-Token Vault";
@@ -122,22 +154,22 @@ async function main() {
 
     const MultiTokenVault = await ethers.getContractFactory("MultiTokenVault");
     const vault = await MultiTokenVault.deploy(
-        tokens.usdc,   // USDC address (underlying asset)
-        manager,       // Manager address
-        agent,         // Agent address
-        config.pyth,   // Pyth contract address
-        vaultName,     // Vault name
-        vaultSymbol    // Vault symbol
+      tokens.usdc, // USDC address (underlying asset)
+      manager, // Manager address
+      agent, // Agent address
+      config.pyth, // Pyth contract address
+      vaultName, // Vault name
+      vaultSymbol // Vault symbol
     );
 
     await vault.waitForDeployment();
     const vaultAddress = await vault.getAddress();
-    
+
     console.log(`✅ MultiTokenVault deployed: ${vaultAddress}`);
 
     // Configure accepted tokens
     console.log("\n=== Configuring Accepted Tokens ===");
-    
+
     // USDC (no oracle needed, 1:1 conversion)
     console.log("⚙️  Configuring USDC...");
     await vault.configureToken(tokens.usdc, ethers.ZeroHash, 6);
@@ -146,39 +178,39 @@ async function main() {
     // WBTC
     console.log("⚙️  Configuring WBTC...");
     try {
-        await vault.configureToken(tokens.wbtc, PRICE_IDS.BTC, 8);
-        console.log(`✅ WBTC configured with BTC/USD price feed`);
+      await vault.configureToken(tokens.wbtc, PRICE_IDS.BTC, 8);
+      console.log(`✅ WBTC configured with BTC/USD price feed`);
     } catch (error) {
-        console.error(`❌ Failed to configure WBTC: ${error}`);
+      console.error(`❌ Failed to configure WBTC: ${error}`);
     }
 
     // WETH
     console.log("⚙️  Configuring WETH...");
     try {
-        await vault.configureToken(tokens.weth, PRICE_IDS.ETH, 18);
-        console.log(`✅ WETH configured with ETH/USD price feed`);
+      await vault.configureToken(tokens.weth, PRICE_IDS.ETH, 18);
+      console.log(`✅ WETH configured with ETH/USD price feed`);
     } catch (error) {
-        console.error(`❌ Failed to configure WETH: ${error}`);
+      console.error(`❌ Failed to configure WETH: ${error}`);
     }
 
     // Final Summary
     console.log("\n" + "=".repeat(80));
     console.log("🎉 DEPLOYMENT COMPLETED SUCCESSFULLY");
     console.log("=".repeat(80));
-    
+
     console.log("\n📋 Contract Addresses:");
     console.log(`🏦 MultiTokenVault: ${vaultAddress}`);
     console.log(`🟡 Mock USDC: ${tokens.usdc}`);
     console.log(`🟠 Mock WBTC: ${tokens.wbtc}`);
     console.log(`🔵 Mock WETH: ${tokens.weth}`);
-    
+
     console.log("\n🔧 Configuration:");
     console.log(`🌐 Network: ${networkName}`);
     console.log(`🔮 Pyth Oracle: ${config.pyth}`);
     console.log(`💰 Base Asset: USDC (${tokens.usdc})`);
     console.log(`👨‍💼 Manager: ${manager}`);
     console.log(`🤖 Agent: ${agent}`);
-    
+
     console.log("\n📋 Supported Tokens:");
     console.log(`• USDC → Direct 1:1 deposit (no oracle)`);
     console.log(`• WBTC → Pyth BTC/USD price conversion`);
@@ -205,15 +237,24 @@ async function main() {
     console.log(`${networkName.toUpperCase()}_WETH_ADDRESS=${tokens.weth}`);
     console.log("# " + "=".repeat(50));
 
-    console.log("\n🚀 Deployment completed! Ready to use MultiTokenVault on " + networkName);
+    console.log(
+      "\n🚀 Deployment completed! Ready to use MultiTokenVault on " +
+        networkName
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Deployment error: ${error.message}`);
+    }
+    throw error;
+  }
 }
 
 main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error("\n❌ DEPLOYMENT FAILED:");
-        console.error("=".repeat(50));
-        console.error(error);
-        console.error("=".repeat(50));
-        process.exit(1);
-    }); 
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error("\n❌ DEPLOYMENT FAILED:");
+    console.error("=".repeat(50));
+    console.error(error);
+    console.error("=".repeat(50));
+    process.exit(1);
+  });

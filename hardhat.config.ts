@@ -48,7 +48,9 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
     },
     arbitrumSepolia: {
-      url: process.env.ARBITRUM_SEPOLIA_RPC_URL || "https://sepolia-rollup.arbitrum.io/rpc",
+      url:
+        process.env.ARBITRUM_SEPOLIA_RPC_URL ||
+        "https://sepolia-rollup.arbitrum.io/rpc",
       accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
     },
     // Base networks
@@ -62,11 +64,13 @@ const config: HardhatUserConfig = {
     },
     // Flow networks
     flow: {
-      url: process.env.FLOW_RPC_URL || 'https://mainnet.evm.nodes.onflow.org',
+      url: process.env.FLOW_RPC_URL || "https://mainnet.evm.nodes.onflow.org",
       accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
     },
     flowTestnet: {
-      url: process.env.FLOW_TESTNET_RPC_URL || 'https://testnet.evm.nodes.onflow.org',
+      url:
+        process.env.FLOW_TESTNET_RPC_URL ||
+        "https://testnet.evm.nodes.onflow.org",
       accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
     },
   },
