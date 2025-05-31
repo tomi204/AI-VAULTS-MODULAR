@@ -1,0 +1,18 @@
+{
+  "network": "flowTestnet",
+  "chainId": "545",
+  "deployer": "0xb70649baF7A93EEB95E3946b3A82F8F312477d2b",
+  "timestamp": "2025-05-31T20:16:45.479Z",
+  "contracts": {
+    "vaultFactory": "0xc527C7a159263b3DfEde1b793C38734F45f7860d"
+  },
+  "config": {
+    "defaultManager": "0xb70649baF7A93EEB95E3946b3A82F8F312477d2b",
+    "defaultAgent": "0xb70649baF7A93EEB95E3946b3A82F8F312477d2b",
+    "treasury": "0xb70649baF7A93EEB95E3946b3A82F8F312477d2b",
+    "creationFee": "0.001"
+  },
+  "gasUsed": {
+    "vaultFactory": "TBD"
+  }
+}

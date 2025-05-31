@@ -64,5 +64,14 @@
       "priceId": "ETH_USD",
       "faucetAmount": "10"
     }
+  },
+  "hardhat": {
+    "vaultFactory": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+  },
+  "flowTestnet": {
+    "vaultFactory": "0xc527C7a159263b3DfEde1b793C38734F45f7860d"
+  },
+  "rootstockTestnet": {
+    "vaultFactory": "0x4f0798F0c3eb261D50b66e6b0f79Aa09803c900D"
   }
 }
