@@ -1,10 +1,10 @@
-# 🤖 AI-Powered Vaults
+# 🤖 SPQRFi
 
 > **Advanced DeFi vault system with AI-driven strategy execution and multi-chain support**
 
 ## 📋 Overview
 
-AI-Powered Vaults is a sophisticated DeFi protocol that combines traditional ERC4626 vault functionality with AI-driven strategy execution. The system allows users to deposit assets into vaults while AI agents automatically optimize yield through whitelisted strategies including swaps, lending, and other DeFi protocols.
+SPQRFi is a sophisticated DeFi protocol that combines traditional ERC4626 vault functionality with AI-driven strategy execution. The system allows users to deposit assets into vaults while AI agents automatically optimize yield through whitelisted strategies including swaps, lending, and other DeFi protocols.
 
 ### 🔒 Security First
 
