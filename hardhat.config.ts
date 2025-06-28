@@ -34,33 +34,30 @@ const config: HardhatUserConfig = {
       url: "http://127.0.0.1:8545",
       chainId: 31337,
     },
-    // Flow networks
-    flow: {
-      url: process.env.FLOW_RPC_URL || "https://mainnet.evm.nodes.onflow.org",
+    arbitrum: {
+      url: process.env.ARBITRUM_RPC_URL || "",
       accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 545,
+      chainId: 42161,
     },
-    flowTestnet: {
-      url:
-        process.env.FLOW_TESTNET_RPC_URL ||
-        "https://testnet.evm.nodes.onflow.org",
+    base: {
+      url: process.env.BASE_RPC_URL || "",
       accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 545,
+      chainId: 8453,
     },
-    // Rootstock networks
-    rootstock: {
-      url: process.env.ROOTSTOCK_RPC_URL || "https://public-node.rsk.co",
+    avalanche: {
+      url: process.env.AVALANCHE_RPC_URL || "",
       accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 30,
-      gasPrice: 60000000, // 0.06 gwei
+      chainId: 43114,
     },
-    rootstockTestnet: {
-      url:
-        process.env.ROOTSTOCK_TESTNET_RPC_URL ||
-        "https://public-node.testnet.rsk.co",
+    fuji: {
+      url: process.env.FUJI_RPC_URL || "",
       accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 31,
-      gasPrice: 60000000, // 0.06 gwei
+      chainId: 43113,
+    },
+    sepolia: {
+      url: process.env.SEPOLIA_RPC_URL || "",
+      accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
+      chainId: 11155111,
     },
   },
   etherscan: {

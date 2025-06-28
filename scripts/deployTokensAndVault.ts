@@ -4,257 +4,200 @@ import * as dotenv from "dotenv";
 // Load environment variables
 dotenv.config();
 
-// Network configuration - simplified to always deploy mock tokens
+// Network configuration - Chainlink price feed addresses for each network
 const NETWORK_CONFIG = {
   ethereum: {
-    pyth: process.env.ETHEREUM_PYTH_ADDRESS,
+    btcUsdFeed:
+      process.env.ETHEREUM_BTC_USD_FEED ||
+      "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c",
+    ethUsdFeed:
+      process.env.ETHEREUM_ETH_USD_FEED ||
+      "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419",
+    linkUsdFeed:
+      process.env.ETHEREUM_LINK_USD_FEED ||
+      "0x2c1d072e956AFFC0D435Cb7AC38EF18d24d9127c",
   },
   sepolia: {
-    pyth: process.env.ETHEREUM_PYTH_ADDRESS,
+    btcUsdFeed:
+      process.env.SEPOLIA_BTC_USD_FEED ||
+      "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
+    ethUsdFeed:
+      process.env.SEPOLIA_ETH_USD_FEED ||
+      "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+    linkUsdFeed:
+      process.env.SEPOLIA_LINK_USD_FEED ||
+      "0xc59E3633BAAC79493d908e63626716e204A45EdF",
   },
   arbitrum: {
-    pyth: process.env.ARBITRUM_PYTH_ADDRESS,
+    btcUsdFeed:
+      process.env.ARBITRUM_BTC_USD_FEED ||
+      "0x6ce185860a4963106506C203335A2910413708e9",
+    ethUsdFeed:
+      process.env.ARBITRUM_ETH_USD_FEED ||
+      "0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612",
+    linkUsdFeed:
+      process.env.ARBITRUM_LINK_USD_FEED ||
+      "0x86E53CF1B870786351Da77A57575e79CB55812CB",
   },
   arbitrumSepolia: {
-    pyth: process.env.ARBITRUM_PYTH_ADDRESS,
+    btcUsdFeed:
+      process.env.ARBITRUM_SEPOLIA_BTC_USD_FEED ||
+      "0x56a43EB56Da12C0dc1D972ACb089c06a5dEF8e69",
+    ethUsdFeed:
+      process.env.ARBITRUM_SEPOLIA_ETH_USD_FEED ||
+      "0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165",
+    linkUsdFeed:
+      process.env.ARBITRUM_SEPOLIA_LINK_USD_FEED ||
+      "0xb113F5A928BCfF189C998ab20d753a47F9dE5A61",
   },
   base: {
-    pyth: process.env.BASE_PYTH_ADDRESS,
+    btcUsdFeed:
+      process.env.BASE_BTC_USD_FEED ||
+      "0x64c911996D3c6aC71f9b455B1E8E7266BcbD848F",
+    ethUsdFeed:
+      process.env.BASE_ETH_USD_FEED ||
+      "0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70",
+    linkUsdFeed:
+      process.env.BASE_LINK_USD_FEED ||
+      "0xFdB631F5EE196F0ed6FAa767959853A9F217697D",
   },
   baseSepolia: {
-    pyth: process.env.BASE_PYTH_ADDRESS,
+    btcUsdFeed:
+      process.env.BASE_SEPOLIA_BTC_USD_FEED ||
+      "0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1",
+    ethUsdFeed:
+      process.env.BASE_SEPOLIA_ETH_USD_FEED ||
+      "0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1",
+    linkUsdFeed:
+      process.env.BASE_SEPOLIA_LINK_USD_FEED ||
+      "0xb113F5A928BCfF189C998ab20d753a47F9dE5A61",
+  },
+  avalanche: {
+    btcUsdFeed: process.env.AVALANCHE_BTC_USD_FEED || "",
+    ethUsdFeed: process.env.AVALANCHE_ETH_USD_FEED || "",
+    linkUsdFeed: process.env.AVALANCHE_LINK_USD_FEED || "",
+  },
+  fuji: {
+    btcUsdFeed: process.env.FUJI_BTC_USD_FEED || "",
+    ethUsdFeed: process.env.FUJI_ETH_USD_FEED || "",
+    linkUsdFeed: process.env.FUJI_LINK_USD_FEED || "",
   },
   flow: {
-    pyth: process.env.FLOW_PYTH_ADDRESS,
+    btcUsdFeed:
+      process.env.FLOW_BTC_USD_FEED ||
+      "0x0000000000000000000000000000000000000001",
+    ethUsdFeed:
+      process.env.FLOW_ETH_USD_FEED ||
+      "0x0000000000000000000000000000000000000002",
+    linkUsdFeed:
+      process.env.FLOW_LINK_USD_FEED ||
+      "0x0000000000000000000000000000000000000003",
   },
   flowTestnet: {
-    pyth: process.env.FLOW_TESTNET_PYTH_ADDRESS,
+    btcUsdFeed:
+      process.env.FLOW_TESTNET_BTC_USD_FEED ||
+      "0x0000000000000000000000000000000000000001",
+    ethUsdFeed:
+      process.env.FLOW_TESTNET_ETH_USD_FEED ||
+      "0x0000000000000000000000000000000000000002",
+    linkUsdFeed:
+      process.env.FLOW_TESTNET_LINK_USD_FEED ||
+      "0x0000000000000000000000000000000000000003",
   },
   hardhat: {
-    pyth: "0x4305FB66699C3B2702D4d05CF36551390A4c69C6", // Default for testing
+    btcUsdFeed: "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
+    ethUsdFeed: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+    linkUsdFeed: "0xc59E3633BAAC79493d908e63626716e204A45EdF",
   },
   localhost: {
-    pyth: "0x4305FB66699C3B2702D4d05CF36551390A4c69C6",
+    btcUsdFeed: "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
+    ethUsdFeed: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+    linkUsdFeed: "0xc59E3633BAAC79493d908e63626716e204A45EdF",
   },
-};
-
-// Price IDs (universal across all networks)
-const PRICE_IDS = {
-  BTC: "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
-  ETH: "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
-  USDC: "0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
 };
 
 async function deployMockTokens() {
-  console.log("\n=== Deploying Mock Tokens ===");
-
-  const tokens: { [key: string]: string } = {};
-
-  // Deploy Mock USDC
-  console.log("🪙 Deploying Mock USDC...");
   const MockUSDC = await ethers.getContractFactory("MockUSDC");
-  const usdc = await MockUSDC.deploy();
-  await usdc.waitForDeployment();
-  tokens.usdc = await usdc.getAddress();
-  console.log(`✅ Mock USDC deployed: ${tokens.usdc}`);
-
-  // Deploy Mock WBTC
-  console.log("🪙 Deploying Mock WBTC...");
   const MockWBTC = await ethers.getContractFactory("MockWBTC");
-  const wbtc = await MockWBTC.deploy();
-  await wbtc.waitForDeployment();
-  tokens.wbtc = await wbtc.getAddress();
-  console.log(`✅ Mock WBTC deployed: ${tokens.wbtc}`);
-
-  // Deploy Mock WETH
-  console.log("🪙 Deploying Mock WETH...");
   const MockWETH = await ethers.getContractFactory("MockWETH");
-  const weth = await MockWETH.deploy();
-  await weth.waitForDeployment();
-  tokens.weth = await weth.getAddress();
-  console.log(`✅ Mock WETH deployed: ${tokens.weth}`);
 
-  return tokens;
+  const usdc = await MockUSDC.deploy();
+  const wbtc = await MockWBTC.deploy();
+  const weth = await MockWETH.deploy();
+
+  await Promise.all([
+    usdc.waitForDeployment(),
+    wbtc.waitForDeployment(),
+    weth.waitForDeployment(),
+  ]);
+
+  return {
+    usdc: await usdc.getAddress(),
+    wbtc: await wbtc.getAddress(),
+    weth: await weth.getAddress(),
+  };
 }
 
 async function main() {
-  console.log("=".repeat(80));
-  console.log(`🚀 DEPLOYING TO: ${network.name.toUpperCase()}`);
-  console.log("=".repeat(80));
+  const [deployer] = await ethers.getSigners();
+  const networkName = network.name;
 
-  // Debug environment and connection
-  console.log("🔍 Debug Info:");
-  console.log(`Network: ${network.name}`);
-  console.log(`PRIV_KEY exists: ${!!process.env.PRIV_KEY}`);
-  console.log(`PRIV_KEY length: ${process.env.PRIV_KEY?.length || 0}`);
+  console.log(`🚀 Deploying to ${networkName.toUpperCase()}`);
+  console.log(`📍 Deployer: ${deployer.address}`);
 
-  try {
-    console.log("🔍 Getting signers...");
-    const signers = await ethers.getSigners();
-    console.log(`Signers found: ${signers.length}`);
-
-    const [deployer] = signers;
-
-    if (!deployer) {
-      console.log("❌ Deployer is undefined");
-      console.log("Available signers:", signers);
-      throw new Error("❌ No deployer found. Check your PRIV_KEY in .env file");
-    }
-
-    console.log(`📍 Deployer: ${deployer.address}`);
-
-    const balance = await deployer.provider.getBalance(deployer.address);
-    const networkName = network.name;
-    console.log(
-      `💰 Balance: ${ethers.formatEther(balance)} ${
-        networkName === "flow" || networkName === "flowTestnet" ? "FLOW" : "ETH"
-      }`
-    );
-
-    // Get network configuration
-    const config = NETWORK_CONFIG[networkName as keyof typeof NETWORK_CONFIG];
-    if (!config) {
-      throw new Error(
-        `❌ Network '${networkName}' not supported. Please add configuration.`
-      );
-    }
-
-    console.log(`✅ Network configuration found for: ${networkName}`);
-
-    // Validate required Pyth address
-    if (!config.pyth) {
-      throw new Error(
-        `❌ Pyth address not configured for ${networkName}. Please set FLOW_TESTNET_PYTH_ADDRESS in your .env file.`
-      );
-    }
-
-    console.log(`🔮 Pyth Oracle: ${config.pyth}`);
-
-    // Always deploy mock tokens
-    console.log("\n📝 Deploying fresh mock tokens for this deployment...");
-    const tokens = await deployMockTokens();
-
-    console.log("\n=== Token Summary ===");
-    console.log(`🟡 USDC: ${tokens.usdc} (6 decimals)`);
-    console.log(`🟠 WBTC: ${tokens.wbtc} (8 decimals)`);
-    console.log(`🔵 WETH: ${tokens.weth} (18 decimals)`);
-
-    // Deploy MultiTokenVault
-    console.log("\n=== Deploying MultiTokenVault ===");
-
-    const manager = process.env.MANAGER_ADDRESS || deployer.address;
-    const agent = process.env.AGENT_ADDRESS || deployer.address;
-    const vaultName = process.env.VAULT_NAME || "Multi-Token Vault";
-    const vaultSymbol = process.env.VAULT_SYMBOL || "mtvUSDC";
-
-    console.log(`👨‍💼 Manager: ${manager}`);
-    console.log(`🤖 Agent: ${agent}`);
-    console.log(`🏷️  Name: ${vaultName}`);
-    console.log(`🏷️  Symbol: ${vaultSymbol}`);
-
-    const MultiTokenVault = await ethers.getContractFactory("MultiTokenVault");
-    const vault = await MultiTokenVault.deploy(
-      tokens.usdc, // USDC address (underlying asset)
-      manager, // Manager address
-      agent, // Agent address
-      config.pyth, // Pyth contract address
-      vaultName, // Vault name
-      vaultSymbol // Vault symbol
-    );
-
-    await vault.waitForDeployment();
-    const vaultAddress = await vault.getAddress();
-
-    console.log(`✅ MultiTokenVault deployed: ${vaultAddress}`);
-
-    // Configure accepted tokens
-    console.log("\n=== Configuring Accepted Tokens ===");
-
-    // USDC (no oracle needed, 1:1 conversion)
-    console.log("⚙️  Configuring USDC...");
-    await vault.configureToken(tokens.usdc, ethers.ZeroHash, 6);
-    console.log("✅ USDC configured (1:1, no oracle needed)");
-
-    // WBTC
-    console.log("⚙️  Configuring WBTC...");
-    try {
-      await vault.configureToken(tokens.wbtc, PRICE_IDS.BTC, 8);
-      console.log(`✅ WBTC configured with BTC/USD price feed`);
-    } catch (error) {
-      console.error(`❌ Failed to configure WBTC: ${error}`);
-    }
-
-    // WETH
-    console.log("⚙️  Configuring WETH...");
-    try {
-      await vault.configureToken(tokens.weth, PRICE_IDS.ETH, 18);
-      console.log(`✅ WETH configured with ETH/USD price feed`);
-    } catch (error) {
-      console.error(`❌ Failed to configure WETH: ${error}`);
-    }
-
-    // Final Summary
-    console.log("\n" + "=".repeat(80));
-    console.log("🎉 DEPLOYMENT COMPLETED SUCCESSFULLY");
-    console.log("=".repeat(80));
-
-    console.log("\n📋 Contract Addresses:");
-    console.log(`🏦 MultiTokenVault: ${vaultAddress}`);
-    console.log(`🟡 Mock USDC: ${tokens.usdc}`);
-    console.log(`🟠 Mock WBTC: ${tokens.wbtc}`);
-    console.log(`🔵 Mock WETH: ${tokens.weth}`);
-
-    console.log("\n🔧 Configuration:");
-    console.log(`🌐 Network: ${networkName}`);
-    console.log(`🔮 Pyth Oracle: ${config.pyth}`);
-    console.log(`💰 Base Asset: USDC (${tokens.usdc})`);
-    console.log(`👨‍💼 Manager: ${manager}`);
-    console.log(`🤖 Agent: ${agent}`);
-
-    console.log("\n📋 Supported Tokens:");
-    console.log(`• USDC → Direct 1:1 deposit (no oracle)`);
-    console.log(`• WBTC → Pyth BTC/USD price conversion`);
-    console.log(`• WETH → Pyth ETH/USD price conversion`);
-
-    console.log("\n🎁 Testing Features:");
-    console.log(`• usdc.faucet(amount) - Get up to 10,000 USDC`);
-    console.log(`• wbtc.faucet(amount) - Get up to 1 WBTC`);
-    console.log(`• weth.faucet(amount) - Get up to 10 WETH`);
-
-    console.log("\n💡 Next Steps:");
-    console.log("1. Save contract addresses to your .env file");
-    console.log("2. Test faucet functions to get tokens");
-    console.log("3. Test deposits with different tokens");
-    console.log("4. Verify contracts on block explorer");
-    console.log("5. Set up yield strategies");
-
-    // Output environment variables for easy copying
-    console.log("\n📝 Environment Variables (copy to .env file):");
-    console.log("# " + "=".repeat(50));
-    console.log(`${networkName.toUpperCase()}_VAULT_ADDRESS=${vaultAddress}`);
-    console.log(`${networkName.toUpperCase()}_USDC_ADDRESS=${tokens.usdc}`);
-    console.log(`${networkName.toUpperCase()}_WBTC_ADDRESS=${tokens.wbtc}`);
-    console.log(`${networkName.toUpperCase()}_WETH_ADDRESS=${tokens.weth}`);
-    console.log("# " + "=".repeat(50));
-
-    console.log(
-      "\n🚀 Deployment completed! Ready to use MultiTokenVault on " +
-        networkName
-    );
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Deployment error: ${error.message}`);
-    }
-    throw error;
+  const config = NETWORK_CONFIG[networkName as keyof typeof NETWORK_CONFIG];
+  if (!config) {
+    throw new Error(`❌ Network '${networkName}' not supported`);
   }
+
+  if (!config.btcUsdFeed || !config.ethUsdFeed || !config.linkUsdFeed) {
+    throw new Error(
+      `❌ Chainlink price feeds not configured for ${networkName}`
+    );
+  }
+
+  const tokens = await deployMockTokens();
+  console.log(`✅ Mock tokens deployed`);
+
+  const manager = process.env.MANAGER_ADDRESS || deployer.address;
+  const agent = process.env.AGENT_ADDRESS || deployer.address;
+  const vaultName = process.env.VAULT_NAME || "Multi-Token Vault";
+  const vaultSymbol = process.env.VAULT_SYMBOL || "mtvUSDC";
+
+  const MultiTokenVault = await ethers.getContractFactory("MultiTokenVault");
+  const vault = await MultiTokenVault.deploy(
+    tokens.usdc,
+    manager,
+    agent,
+    vaultName,
+    vaultSymbol
+  );
+
+  await vault.waitForDeployment();
+  const vaultAddress = await vault.getAddress();
+
+  // Configure tokens
+  await vault.configureToken(tokens.usdc, ethers.ZeroAddress, 6);
+  await vault.configureToken(tokens.wbtc, config.btcUsdFeed, 8);
+  await vault.configureToken(tokens.weth, config.ethUsdFeed, 18);
+
+  console.log(`✅ MultiTokenVault deployed: ${vaultAddress}`);
+  console.log(`📋 Contract Addresses:`);
+  console.log(`  Vault: ${vaultAddress}`);
+  console.log(`  USDC: ${tokens.usdc}`);
+  console.log(`  WBTC: ${tokens.wbtc}`);
+  console.log(`  WETH: ${tokens.weth}`);
+
+  console.log(`\n📝 Environment Variables:`);
+  console.log(`${networkName.toUpperCase()}_VAULT_ADDRESS=${vaultAddress}`);
+  console.log(`${networkName.toUpperCase()}_USDC_ADDRESS=${tokens.usdc}`);
+  console.log(`${networkName.toUpperCase()}_WBTC_ADDRESS=${tokens.wbtc}`);
+  console.log(`${networkName.toUpperCase()}_WETH_ADDRESS=${tokens.weth}`);
 }
 
 main()
   .then(() => process.exit(0))
   .catch((error) => {
-    console.error("\n❌ DEPLOYMENT FAILED:");
-    console.error("=".repeat(50));
-    console.error(error);
-    console.error("=".repeat(50));
+    console.error(`❌ Deployment failed: ${error.message}`);
     process.exit(1);
   });

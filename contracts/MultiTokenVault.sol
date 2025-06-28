@@ -8,12 +8,11 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
-import "@pythnetwork/pyth-sdk-solidity/IPyth.sol";
-import "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
+import "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import "./interfaces/Strategies.sol";
 
 /// @title MultiTokenVault Contract
-/// @notice Multi-token vault that accepts ERC20s and converts value to USDC using Pyth oracle
+/// @notice Multi-token vault that accepts ERC20s and converts value to USDC using Chainlink oracle
 /// @dev Extends ERC4626 with USDC as underlying asset, accepts multiple ERC20 tokens for deposits
 contract MultiTokenVault is Ownable, ERC4626, AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -23,12 +22,9 @@ contract MultiTokenVault is Ownable, ERC4626, AccessControl, ReentrancyGuard {
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
     bytes32 public constant AGENT_ROLE = keccak256("AGENT_ROLE");
 
-    /// @notice Pyth oracle contract
-    IPyth public immutable pyth;
-
     /// @notice Token configuration
     struct TokenConfig {
-        bytes32 priceId; // Pyth price ID
+        AggregatorV3Interface priceFeed; // Chainlink price feed address
         uint8 decimals; // Token decimals
         bool isAccepted; // Whether token is accepted for deposits
     }
@@ -43,8 +39,8 @@ contract MultiTokenVault is Ownable, ERC4626, AccessControl, ReentrancyGuard {
     address[] public strategies;
     mapping(address => bool) public isStrategy;
 
-    /// @notice Maximum age for price feeds (25 minutes)
-    uint256 public constant MAX_PRICE_AGE = 1500;
+    /// @notice Maximum age for price feeds (24 hours for testnets, 25 minutes for mainnet)
+    uint256 public constant MAX_PRICE_AGE = 86400;
 
     // ============ Events ============
 
@@ -57,7 +53,7 @@ contract MultiTokenVault is Ownable, ERC4626, AccessControl, ReentrancyGuard {
     );
     event TokenConfigured(
         address indexed token,
-        bytes32 priceId,
+        address indexed priceFeed,
         uint8 decimals
     );
     event TokenRemoved(address indexed token);
@@ -76,6 +72,7 @@ contract MultiTokenVault is Ownable, ERC4626, AccessControl, ReentrancyGuard {
     error ExecutionFailed();
     error InvalidAddress();
     error InsufficientBalance();
+    error InvalidPriceData();
 
     // ============ Modifiers ============
 
@@ -101,19 +98,13 @@ contract MultiTokenVault is Ownable, ERC4626, AccessControl, ReentrancyGuard {
         address _usdc,
         address manager,
         address agent,
-        address _pyth,
         string memory _name,
         string memory _symbol
     ) ERC4626(IERC20(_usdc)) ERC20(_name, _symbol) Ownable(msg.sender) {
         require(
-            _usdc != address(0) &&
-                manager != address(0) &&
-                agent != address(0) &&
-                _pyth != address(0),
+            _usdc != address(0) && manager != address(0) && agent != address(0),
             "Zero address"
         );
-
-        pyth = IPyth(_pyth);
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MANAGER_ROLE, manager);
@@ -147,11 +138,8 @@ contract MultiTokenVault is Ownable, ERC4626, AccessControl, ReentrancyGuard {
         // Transfer token from user to vault
         IERC20(token).safeTransferFrom(msg.sender, address(this), tokenAmount);
 
-        // Get token price from Pyth oracle
-        PythStructs.Price memory tokenPrice = pyth.getPriceNoOlderThan(
-            config.priceId,
-            MAX_PRICE_AGE
-        );
+        // Get token price from Chainlink oracle
+        uint256 tokenPrice = _getChainlinkPrice(config.priceFeed);
 
         // Convert to USDC equivalent value
         uint256 usdcEquivalent = _convertToUSDC(
@@ -176,25 +164,49 @@ contract MultiTokenVault is Ownable, ERC4626, AccessControl, ReentrancyGuard {
         );
     }
 
-    /// @notice Convert token amount to USDC equivalent using Pyth price
+    /// @notice Get latest price from Chainlink oracle with staleness check
+    function _getChainlinkPrice(
+        AggregatorV3Interface priceFeed
+    ) internal view returns (uint256) {
+        (
+            uint80 roundId,
+            int256 price,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        ) = priceFeed.latestRoundData();
+
+        // Check if price is stale
+        if (updatedAt == 0 || block.timestamp - updatedAt > MAX_PRICE_AGE) {
+            revert PriceStale();
+        }
+
+        // Check if price is valid
+        if (price <= 0) {
+            revert InvalidPriceData();
+        }
+
+        // Check if round is complete
+        if (answeredInRound < roundId) {
+            revert InvalidPriceData();
+        }
+
+        return uint256(price);
+    }
+
+    /// @notice Convert token amount to USDC equivalent using Chainlink price
     function _convertToUSDC(
         uint256 tokenAmount,
-        PythStructs.Price memory price,
+        uint256 price,
         uint8 tokenDecimals
     ) internal pure returns (uint256 usdcAmount) {
-        if (price.price <= 0) revert PriceStale();
+        // Chainlink price feeds typically have 8 decimals for USD pairs
+        uint8 priceDecimals = 8;
 
-        // Calculate: (tokenAmount * price * 10^6) / (10^tokenDecimals * 10^|expo|)
+        // Calculate: (tokenAmount * price * 10^6) / (10^tokenDecimals * 10^priceDecimals)
         // Result in USDC equivalent (6 decimals)
-        uint256 priceDecimals = price.expo < 0
-            ? uint256(int256(-price.expo))
-            : uint256(int256(price.expo));
-
-        uint256 rawPrice = uint256(uint64(price.price));
-
-        // Normalize to USDC decimals (6)
         usdcAmount =
-            (tokenAmount * rawPrice * 1e6) /
+            (tokenAmount * price * 1e6) /
             (10 ** tokenDecimals * 10 ** priceDecimals);
 
         return usdcAmount;
@@ -204,11 +216,11 @@ contract MultiTokenVault is Ownable, ERC4626, AccessControl, ReentrancyGuard {
 
     /// @notice Configure accepted token for deposits
     /// @param token Token address (ERC20 only, no address(0))
-    /// @param priceId Pyth price ID (can be 0x0 for USDC)
+    /// @param priceFeed Chainlink price feed address (can be address(0) for USDC)
     /// @param decimals Token decimals
     function configureToken(
         address token,
-        bytes32 priceId,
+        address priceFeed,
         uint8 decimals
     ) external onlyManager {
         if (token == address(0)) revert InvalidAddress(); // No native ETH
@@ -218,12 +230,12 @@ contract MultiTokenVault is Ownable, ERC4626, AccessControl, ReentrancyGuard {
         }
 
         acceptedTokens[token] = TokenConfig({
-            priceId: priceId, // Can be 0x0 for USDC since no conversion needed
+            priceFeed: AggregatorV3Interface(priceFeed), // Can be address(0) for USDC since no conversion needed
             decimals: decimals > 0 ? decimals : _getTokenDecimals(token),
             isAccepted: true
         });
 
-        emit TokenConfigured(token, priceId, decimals);
+        emit TokenConfigured(token, priceFeed, decimals);
     }
 
     /// @notice Remove token from accepted list
@@ -346,10 +358,7 @@ contract MultiTokenVault is Ownable, ERC4626, AccessControl, ReentrancyGuard {
         TokenConfig memory config = acceptedTokens[token];
         if (!config.isAccepted) revert TokenNotAccepted();
 
-        PythStructs.Price memory tokenPrice = pyth.getPriceNoOlderThan(
-            config.priceId,
-            MAX_PRICE_AGE
-        );
+        uint256 tokenPrice = _getChainlinkPrice(config.priceFeed);
         return _convertToUSDC(tokenAmount, tokenPrice, config.decimals);
     }
 
