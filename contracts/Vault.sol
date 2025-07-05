@@ -93,7 +93,6 @@ contract Vault is Ownable, ERC4626, AccessControl, IERC721Receiver {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MANAGER_ROLE, manager);
         _grantRole(AGENT_ROLE, agent);
-        createTable();
     }
 
     // ============ External Functions ============
@@ -152,6 +151,9 @@ contract Vault is Ownable, ERC4626, AccessControl, IERC721Receiver {
     /**
      * @dev Deposits assets to a strategy and executes it
      * @param strategy The address of the strategy to deposit to
+     * @param reason The reason for this deposit
+     * @param updatedAt The timestamp of this operation
+     * @param riskLevel The risk level of this operation
      * @param amount The amount of assets to deposit
      * @param data Additional data for the strategy execution
      */
@@ -176,29 +178,37 @@ contract Vault is Ownable, ERC4626, AccessControl, IERC721Receiver {
         // Call strategy execute function
         IStrategies(strategy).execute(amount, data);
 
-        // Insert into table
-        TablelandDeployments.get().mutate(
-            address(this), // Table owner, i.e., this contract
-            _tableId,
-            SQLHelpers.toInsert(
-                _TABLE_PREFIX,
+        // Only perform Tableland operations if table has been created
+        if (_tableId > 0) {
+            // Prepare values for Tableland insertion
+            string memory strategyHex = Strings.toHexString(strategy);
+            string memory amountStr = Strings.toString(amount);
+            string memory tableIdStr = Strings.toString(_tableId);
+
+            // Insert into table
+            TablelandDeployments.get().mutate(
+                address(this), // Table owner, i.e., this contract
                 _tableId,
-                "id,strategy_address,reason,updated_at,amount,risk_level",
-                string.concat(
-                    Strings.toString(_tableId), // Convert to a string
-                    ",",
-                    SQLHelpers.quote(Strings.toHexString(strategy)), // Wrap strings in single quotes with the `quote` method
-                    ",",
-                    SQLHelpers.quote(reason), // Wrap strings in single quotes with the `quote` method
-                    ",",
-                    SQLHelpers.quote(updatedAt), // Wrap strings in single quotes with the `quote` method
-                    ",",
-                    SQLHelpers.quote(Strings.toString(amount)), // Wrap strings in single quotes with the `quote` method
-                    ",",
-                    SQLHelpers.quote(riskLevel) // Wrap strings in single quotes with the `quote` method
+                SQLHelpers.toInsert(
+                    _TABLE_PREFIX,
+                    _tableId,
+                    "id,strategy_address,reason,updated_at,amount,risk_level",
+                    string.concat(
+                        tableIdStr,
+                        ",",
+                        SQLHelpers.quote(strategyHex),
+                        ",",
+                        SQLHelpers.quote(reason),
+                        ",",
+                        SQLHelpers.quote(updatedAt),
+                        ",",
+                        SQLHelpers.quote(amountStr),
+                        ",",
+                        SQLHelpers.quote(riskLevel)
+                    )
                 )
-            )
-        );
+            );
+        }
 
         emit StrategyExecuted(strategy, data);
     }

@@ -2,6 +2,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-ignition-ethers";
 import "dotenv/config";
+import "@tableland/hardhat";
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -13,6 +14,7 @@ const config: HardhatUserConfig = {
             enabled: true,
             runs: 200,
           },
+          viaIR: true,
         },
       },
       {
@@ -22,9 +24,14 @@ const config: HardhatUserConfig = {
             enabled: true,
             runs: 200,
           },
+          viaIR: true,
         },
       },
     ],
+  },
+  localTableland: {
+    silent: false,
+    verbose: false,
   },
   networks: {
     hardhat: {
@@ -34,30 +41,16 @@ const config: HardhatUserConfig = {
       url: "http://127.0.0.1:8545",
       chainId: 31337,
     },
-    arbitrum: {
-      url: process.env.ARBITRUM_RPC_URL || "",
-      accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 42161,
+    "local-tableland": {
+      url: "http://127.0.0.1:8545",
+      chainId: 31337,
     },
-    base: {
-      url: process.env.BASE_RPC_URL || "",
+    calibration: {
+      url:
+        process.env.CALIBRATION_RPC_URL ||
+        "https://rpc.ankr.com/filecoin_testnet",
       accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 8453,
-    },
-    avalanche: {
-      url: process.env.AVALANCHE_RPC_URL || "",
-      accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 43114,
-    },
-    fuji: {
-      url: process.env.FUJI_RPC_URL || "",
-      accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 43113,
-    },
-    sepolia: {
-      url: process.env.SEPOLIA_RPC_URL || "",
-      accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 11155111,
+      chainId: 314159,
     },
   },
   etherscan: {

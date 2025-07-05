@@ -9,6 +9,10 @@
     "deploy:base": "npx hardhat run scripts/deployTokensAndVault.ts --network base",
     "deploy:avalanche": "npx hardhat run scripts/deployTokensAndVault.ts --network avalanche",
     "deploy:fuji": "npx hardhat run scripts/deployTokensAndVault.ts --network fuji",
+    "deploy:filecoin": "npx hardhat run scripts/deploy-filecoin.ts --network calibration",
+    "deploy:filecoin-testnet": "npx hardhat run scripts/deploy-filecoin.ts --network calibration",
+    "mint:filecoin": "npx hardhat run scripts/mint-usdfc.ts --network calibration",
+    "deposit:filecoin": "npx hardhat run scripts/deposit-usdfc.ts --network calibration",
     "interact": "npx hardhat run scripts/interact-vault.ts",
     "status": "npx hardhat run scripts/vault-status.ts",
     "tokens": "npx hardhat run scripts/get-test-tokens.ts",
@@ -19,6 +23,7 @@
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@tableland/hardhat": "^0.0.9",
     "hardhat": "^2.24.1"
   },
   "dependencies": {
