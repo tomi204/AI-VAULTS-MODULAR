@@ -106,7 +106,7 @@ export PRIV_KEY="your_private_key_here"
 
 #### Step 1: Get Test FIL
 
-1. Go to [Beryx Faucet](https://beryx.zondax.ch/faucet)
+1. Go to [Beryx Faucet](https://beryx.io/faucet)
 2. Enter your wallet address
 3. Receive test FIL tokens
 
@@ -156,12 +156,12 @@ npm test
 
 ### Filecoin Calibration Testnet
 
-| Contract          | Address                                      | Explorer                                                                            |
-| ----------------- | -------------------------------------------- | ----------------------------------------------------------------------------------- |
-| **AI Vault**      | `0xAF28B48E48317109F885FEc05751f5422d850857` | [Beryx](https://beryx.zondax.ch/address/0xAF28B48E48317109F885FEc05751f5422d850857) |
-| **Strategy**      | `0xF3B66dEF94Ab0C8D485e36845f068aFB48959A04` | [Beryx](https://beryx.zondax.ch/address/0xF3B66dEF94Ab0C8D485e36845f068aFB48959A04) |
-| **Mock Protocol** | `0x8fDE7A649c782c96e7f4D9D88490a7C5031F51a9` | [Beryx](https://beryx.zondax.ch/address/0x8fDE7A649c782c96e7f4D9D88490a7C5031F51a9) |
-| **USDFC Token**   | `0xb3042734b608a1B16e9e86B374A3f3e389B4cDf0` | [Beryx](https://beryx.zondax.ch/address/0xb3042734b608a1B16e9e86B374A3f3e389B4cDf0) |
+| Contract          | Address                                      | Explorer                                                                                     |
+| ----------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **AI Vault**      | `0xAF28B48E48317109F885FEc05751f5422d850857` | [Beryx](https://beryx.io/fil/calibration/address/0xAF28B48E48317109F885FEc05751f5422d850857) |
+| **Strategy**      | `0xF3B66dEF94Ab0C8D485e36845f068aFB48959A04` | [Beryx](https://beryx.io/fil/calibration/address/0xF3B66dEF94Ab0C8D485e36845f068aFB48959A04) |
+| **Mock Protocol** | `0x8fDE7A649c782c96e7f4D9D88490a7C5031F51a9` | [Beryx](https://beryx.io/fil/calibration/address/0x8fDE7A649c782c96e7f4D9D88490a7C5031F51a9) |
+| **USDFC Token**   | `0xb3042734b608a1B16e9e86B374A3f3e389B4cDf0` | [Beryx](https://beryx.io/fil/calibration/address/0xb3042734b608a1B16e9e86B374A3f3e389B4cDf0) |
 
 **Network Details:**
 
@@ -171,15 +171,15 @@ npm test
 
 ### Flow Testnet
 
-| Contract      | Address                                      | Explorer                                                                                   |
-| ------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| **AI Vault**  | `0x7C65F77a4EbEa3D56368A73A12234bB4384ACB28` | [Flowscan](https://testnet.flowscan.io/account/0x7C65F77a4EbEa3D56368A73A12234bB4384ACB28) |
-| **Mock USDC** | `0xAF28B48E48317109F885FEc05751f5422d850857` | [Flowscan](https://testnet.flowscan.io/account/0xAF28B48E48317109F885FEc05751f5422d850857) |
+| Contract      | Address                                      | Explorer                                                                                       |
+| ------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **AI Vault**  | `0x7C65F77a4EbEa3D56368A73A12234bB4384ACB28` | [Flowscan](https://evm-testnet.flowscan.io/address/0x7C65F77a4EbEa3D56368A73A12234bB4384ACB28) |
+| **Mock USDC** | `0xAF28B48E48317109F885FEc05751f5422d850857` | [Flowscan](https://evm-testnet.flowscan.io/address/0xAF28B48E48317109F885FEc05751f5422d850857) |
 
 **Network Details:**
 
 - **Chain ID**: 545 (0x221)
-- **RPC**: https://testnet.flowscan.io
+- **RPC**: https://testnet.evm.nodes.onflow.org
 - **Currency**: FLOW
 
 ### Deployment Summary
@@ -354,8 +354,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- **Filecoin Explorer**: [beryx.zondax.ch](https://beryx.zondax.ch)
-- **Flow Explorer**: [testnet.flowscan.io](https://testnet.flowscan.io)
+- **Filecoin Explorer**: [beryx.io](https://beryx.io/fil/calibration)
+- **Flow Explorer**: [evm-testnet.flowscan.io](https://evm-testnet.flowscan.io)
 - **Tableland**: [tableland.xyz](https://tableland.xyz)
 - **Documentation**: [docs.ai-vaults.xyz](https://docs.ai-vaults.xyz)
 - **Discord**: [discord.gg/ai-vaults](https://discord.gg/ai-vaults)

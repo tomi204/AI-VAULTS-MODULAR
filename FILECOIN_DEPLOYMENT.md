@@ -30,7 +30,7 @@ The project is configured for Filecoin Calibration Testnet:
 - **Chain ID**: 314159 (0x4cb2f)
 - **RPC URL**: https://rpc.ankr.com/filecoin_testnet
 - **Currency**: tFIL (test FIL)
-- **Block Explorer**: https://beryx.zondax.ch/
+- **Block Explorer**: https://beryx.io/fil/calibration
 
 ### Getting Test Tokens
 
@@ -48,7 +48,7 @@ The project is configured for Filecoin Calibration Testnet:
    ```
 
 2. **Get test FIL from faucet:**
-   - Go to: https://beryx.zondax.ch/faucet
+   - Go to: https://beryx.io/faucet
    - Enter your Ethereum address
    - Request test FIL
 
@@ -130,7 +130,7 @@ After successful deployment, you'll get:
    ```
 
 3. **Monitor on explorers:**
-   - Beryx Explorer: https://beryx.zondax.ch/
+   - Beryx Explorer: https://beryx.io/fil/calibration
    - Filfox Explorer: https://calibration.filfox.info/en
 
 ### Troubleshooting
@@ -159,7 +159,7 @@ If you want to add Filecoin Calibration to MetaMask:
 - **RPC URL**: https://rpc.ankr.com/filecoin_testnet
 - **Chain ID**: 314159
 - **Currency Symbol**: tFIL
-- **Block Explorer**: https://beryx.zondax.ch/
+- **Block Explorer**: https://beryx.io/fil/calibration
 
 ### Next Steps
 
@@ -173,7 +173,7 @@ If you want to add Filecoin Calibration to MetaMask:
 - [Filecoin Documentation](https://docs.filecoin.io/)
 - [FEVM Developer Resources](https://github.com/filecoin-project/fevm-hardhat-kit)
 - [Filecoin Calibration Network](https://docs.filecoin.io/networks/calibration/)
-- [Beryx Explorer](https://beryx.zondax.ch/)
+- [Beryx Explorer](https://beryx.io/fil/calibration)
 - [Filfox Explorer](https://calibration.filfox.info/en)
 
 ### Support
