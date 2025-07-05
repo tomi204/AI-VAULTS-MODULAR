@@ -7,18 +7,25 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "./interfaces/Strategies.sol";
+import {TablelandDeployments} from "@tableland/evm/contracts/utils/TablelandDeployments.sol";
+import {SQLHelpers} from "@tableland/evm/contracts/utils/SQLHelpers.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 /// @title Vault Contract
 /// @notice This contract implements an ERC4626 vault with role-based access control
 /// @dev Extends ERC4626 for vault functionality, Ownable for ownership, and AccessControl for role management
-contract Vault is Ownable, ERC4626, AccessControl {
+contract Vault is Ownable, ERC4626, AccessControl, IERC721Receiver {
     using SafeERC20 for IERC20;
 
     // ============ State Variables ============
     /// @notice Role identifier for vault managers
     /// @dev Used in AccessControl for manager permissions
     bytes32 public constant MANAGER_ROLE = keccak256("VAULT_MANAGER_ROLE");
+    // Store relevant table info
+    uint256 private _tableId; // Unique table ID
+    string private constant _TABLE_PREFIX = "ai_movements"; // Custom table prefix
 
     /// @notice Role identifier for vault agents
     /// @dev Used in AccessControl for agent permissions
@@ -31,6 +38,7 @@ contract Vault is Ownable, ERC4626, AccessControl {
     mapping(address => bool) public isStrategy;
 
     // ============ Events ============
+    event TableCreated(uint256 indexed tableId);
     event StrategyAdded(address indexed strategy);
     event StrategyRemoved(address indexed strategy);
     event StrategyExecuted(address indexed strategy, bytes data);
@@ -85,6 +93,7 @@ contract Vault is Ownable, ERC4626, AccessControl {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MANAGER_ROLE, manager);
         _grantRole(AGENT_ROLE, agent);
+        createTable();
     }
 
     // ============ External Functions ============
@@ -148,6 +157,9 @@ contract Vault is Ownable, ERC4626, AccessControl {
      */
     function depositToStrategy(
         address strategy,
+        string memory reason,
+        string memory updatedAt,
+        string memory riskLevel,
         uint256 amount,
         bytes calldata data
     ) external onlyAgent {
@@ -163,6 +175,30 @@ contract Vault is Ownable, ERC4626, AccessControl {
 
         // Call strategy execute function
         IStrategies(strategy).execute(amount, data);
+
+        // Insert into table
+        TablelandDeployments.get().mutate(
+            address(this), // Table owner, i.e., this contract
+            _tableId,
+            SQLHelpers.toInsert(
+                _TABLE_PREFIX,
+                _tableId,
+                "id,strategy_address,reason,updated_at,amount,risk_level",
+                string.concat(
+                    Strings.toString(_tableId), // Convert to a string
+                    ",",
+                    SQLHelpers.quote(Strings.toHexString(strategy)), // Wrap strings in single quotes with the `quote` method
+                    ",",
+                    SQLHelpers.quote(reason), // Wrap strings in single quotes with the `quote` method
+                    ",",
+                    SQLHelpers.quote(updatedAt), // Wrap strings in single quotes with the `quote` method
+                    ",",
+                    SQLHelpers.quote(Strings.toString(amount)), // Wrap strings in single quotes with the `quote` method
+                    ",",
+                    SQLHelpers.quote(riskLevel) // Wrap strings in single quotes with the `quote` method
+                )
+            )
+        );
 
         emit StrategyExecuted(strategy, data);
     }
@@ -197,6 +233,39 @@ contract Vault is Ownable, ERC4626, AccessControl {
         IStrategies(strategy).emergencyExit(data);
 
         emit EmergencyExit(strategy, data);
+    }
+
+    /// ============ Tableland Functions ============
+
+    /**
+     * @dev Creates a simple table with an `id` and `val` column
+     */
+    function createTable() public payable onlyOwner {
+        _tableId = TablelandDeployments.get().create(
+            address(this),
+            SQLHelpers.toCreateFromSchema(
+                "id integer primary key,"
+                "strategy_address text,"
+                "reason text,"
+                "updated_at text,"
+                "amount text,"
+                "risk_level text",
+                _TABLE_PREFIX
+            )
+        );
+        emit TableCreated(_tableId);
+    }
+
+    /**
+     * @dev Required for the contract to own a table
+     */
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes calldata
+    ) external pure returns (bytes4) {
+        return IERC721Receiver.onERC721Received.selector;
     }
 
     // ============ ERC4626 Functions ============
