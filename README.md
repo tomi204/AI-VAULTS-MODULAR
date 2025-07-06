@@ -79,6 +79,14 @@ User Deposits → Vault → AI Analysis → Strategy Execution → Yield Distrib
 - **SQL-Compatible**: Easy querying of vault activity
 - **Immutable Records**: Tamper-proof historical data
 
+#### **Movement Logger System**
+
+- **AI Decision Tracking**: Records all AI agent decisions with CIDs
+- **Filecoin Integration**: Stores decision metadata on Filecoin via Decision Registry
+- **Tableland Tables**: Creates structured tables for movement analysis
+- **Keeper Permissions**: Only authorized addresses can log movements
+- **Risk Assessment**: Tracks risk levels for each AI decision
+
 #### **Security Framework**
 
 - **Role-Based Access Control**: Owner, Manager, Agent, User permissions
@@ -156,12 +164,14 @@ npm test
 
 ### Filecoin Calibration Testnet
 
-| Contract          | Address                                      | Explorer                                                                                     |
-| ----------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **AI Vault**      | `0xAF28B48E48317109F885FEc05751f5422d850857` | [Beryx](https://beryx.io/fil/calibration/address/0xAF28B48E48317109F885FEc05751f5422d850857) |
-| **Strategy**      | `0xF3B66dEF94Ab0C8D485e36845f068aFB48959A04` | [Beryx](https://beryx.io/fil/calibration/address/0xF3B66dEF94Ab0C8D485e36845f068aFB48959A04) |
-| **Mock Protocol** | `0x8fDE7A649c782c96e7f4D9D88490a7C5031F51a9` | [Beryx](https://beryx.io/fil/calibration/address/0x8fDE7A649c782c96e7f4D9D88490a7C5031F51a9) |
-| **USDFC Token**   | `0xb3042734b608a1B16e9e86B374A3f3e389B4cDf0` | [Beryx](https://beryx.io/fil/calibration/address/0xb3042734b608a1B16e9e86B374A3f3e389B4cDf0) |
+| Contract                | Address                                      | Explorer                                                                                     |
+| ----------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **AI Vault**            | `0xAF28B48E48317109F885FEc05751f5422d850857` | [Beryx](https://beryx.io/fil/calibration/address/0xAF28B48E48317109F885FEc05751f5422d850857) |
+| **Strategy**            | `0xF3B66dEF94Ab0C8D485e36845f068aFB48959A04` | [Beryx](https://beryx.io/fil/calibration/address/0xF3B66dEF94Ab0C8D485e36845f068aFB48959A04) |
+| **Mock Protocol**       | `0x8fDE7A649c782c96e7f4D9D88490a7C5031F51a9` | [Beryx](https://beryx.io/fil/calibration/address/0x8fDE7A649c782c96e7f4D9D88490a7C5031F51a9) |
+| **USDFC Token**         | `0xb3042734b608a1B16e9e86B374A3f3e389B4cDf0` | [Beryx](https://beryx.io/fil/calibration/address/0xb3042734b608a1B16e9e86B374A3f3e389B4cDf0) |
+| **Movement Logger**     | `0x9f03F83F092D025635AeA1800E6AB3c9f0882673` | [Beryx](https://beryx.io/fil/calibration/address/0x9f03F83F092D025635AeA1800E6AB3c9f0882673) |
+| **Decision Registry**   | `0xDcc2986e610B51ECA891Bd2470F7CcD02F9C4e1B` | [Beryx](https://beryx.io/fil/calibration/address/0xDcc2986e610B51ECA891Bd2470F7CcD02F9C4e1B) |
 
 **Network Details:**
 
@@ -190,6 +200,14 @@ npm test
 - **Vault Total Assets**: 2.0 USDFC
 - **Strategy Deposits**: Successfully executed
 - **Tableland Integration**: Active data tracking
+
+✅ **Movement Logger System:**
+
+- **Movement Logger**: 0x9f03F83F092D025635AeA1800E6AB3c9f0882673
+- **Decision Registry**: 0xDcc2986e610B51ECA891Bd2470F7CcD02F9C4e1B
+- **Keeper Address**: 0x4416b4D774E2B3C0FF922ADC3bc136cfdA55C7db
+- **Tableland Table ID**: 899
+- **Test Movement**: Successfully logged with CID tracking
 
 ## 💡 AI Strategy Examples
 
@@ -237,6 +255,7 @@ FOR each Storage_Pool in WHITELISTED_POOLS:
 | --------------------------------- | -------------------------------------- | -------- |
 | `npm run deploy:filecoin`         | Deploy to Filecoin Calibration         | Filecoin |
 | `npm run deploy:filecoin-testnet` | Deploy to Filecoin Calibration (alias) | Filecoin |
+| `npm run deploy:movement-logger`  | Deploy Movement Logger system          | Filecoin |
 
 ### Interaction Scripts
 
@@ -246,6 +265,7 @@ FOR each Storage_Pool in WHITELISTED_POOLS:
 | `npm run deposit:filecoin` | Deposit 1 USDFC to vault     |
 | `npm run status`           | Check vault status           |
 | `npm run interact`         | Interactive vault operations |
+| `npm run test:movement-logger` | Test Movement Logger system  |
 
 ### Development Scripts
 

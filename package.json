@@ -11,6 +11,8 @@
     "deploy:fuji": "npx hardhat run scripts/deployTokensAndVault.ts --network fuji",
     "deploy:filecoin": "npx hardhat run scripts/deploy-filecoin.ts --network calibration",
     "deploy:filecoin-testnet": "npx hardhat run scripts/deploy-filecoin.ts --network calibration",
+    "deploy:movement-logger": "npx hardhat run scripts/deploy-movement-logger.ts --network calibration",
+    "test:movement-logger": "npx hardhat run scripts/test-movement-logger.ts --network calibration",
     "mint:filecoin": "npx hardhat run scripts/mint-usdfc.ts --network calibration",
     "deposit:filecoin": "npx hardhat run scripts/deposit-usdfc.ts --network calibration",
     "interact": "npx hardhat run scripts/interact-vault.ts",
